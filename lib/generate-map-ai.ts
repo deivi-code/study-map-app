@@ -11,7 +11,7 @@ import { generateStudyMap } from "./study"
 import type { StudyMap } from "./types"
 
 const MIN_CONTENT_LENGTH = 50
-const DEFAULT_MODEL = "gemini-2.5-flash"
+const DEFAULT_MODEL = "gemini-3.1-flash-lite"
 
 function getGeminiApiKey(): string | undefined {
   return process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? process.env.GEMINI_API_KEY
