@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useStudy } from "@/lib/store"
-import { Logo, ThemeToggle } from "@/components/brand"
+import { Logo, ThemeToggle, AuthButton } from "@/components/brand"
 import { Landing } from "@/components/landing"
 import { UploadScreen } from "@/components/upload-screen"
 import { SkillTree } from "@/components/skill-tree"
@@ -94,6 +94,7 @@ export function AppShell() {
               <Plus className="h-4 w-4" />
               Nuevo mapa
             </button>
+            <AuthButton />
             <ThemeToggle />
           </div>
         </div>

@@ -1,8 +1,17 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
+import { createAuthClient } from "better-auth/react"
 import { masteryFromScore } from "./study"
 import type { ProgressMap, StudyMap } from "./types"
+import { anonymousClient } from "better-auth/client/plugins"
+
+const authClient = createAuthClient({
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+  plugins: [
+    anonymousClient()
+  ]
+})
 
 export type View = "landing" | "upload" | "app"
 
@@ -10,6 +19,14 @@ interface GenerateInput {
   text: string
   source: string
   file?: File | null
+}
+
+interface User {
+  id: string
+  name: string | null
+  email: string | null
+  image: string | null
+  isAnonymous: boolean
 }
 
 interface StudyState {
@@ -38,6 +55,15 @@ interface StudyState {
 
   theme: "dark" | "light"
   toggleTheme: () => void
+
+  // Auth and persistence
+  user: User | null
+  isLoadingUser: boolean
+  signInWithGoogle: () => Promise<void>
+  signInWithEmail: (email: string) => Promise<void>
+  signOut: () => Promise<void>
+  rateLimitRemaining: number
+  rateLimitResetAt: Date | null
 }
 
 const StudyContext = createContext<StudyState | null>(null)
@@ -52,12 +78,55 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark")
   const [isGenerating, setIsGenerating] = useState(false)
   const [generateError, setGenerateError] = useState<string | null>(null)
+  
+  // Auth state
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoadingUser, setIsLoadingUser] = useState(true)
+  const [rateLimitRemaining, setRateLimitRemaining] = useState(10)
+  const [rateLimitResetAt, setRateLimitResetAt] = useState<Date | null>(null)
 
   useEffect(() => {
     const root = document.documentElement
     if (theme === "dark") root.classList.add("dark")
     else root.classList.remove("dark")
   }, [theme])
+
+  // Load user session on mount
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const session = await authClient.getSession()
+        const sessionData = session.data
+        
+        if (sessionData && sessionData.user) {
+          setUser({
+            id: sessionData.user.id,
+            name: sessionData.user.name,
+            email: sessionData.user.email || null,
+            image: sessionData.user.image || null,
+            isAnonymous: sessionData.user.isAnonymous || false,
+          })
+        } else {
+          // Sign in anonymously if no session
+          const result = await authClient.signIn.anonymous()
+          if (result.data?.user) {
+            setUser({
+              id: result.data.user.id,
+              name: result.data.user.name,
+              email: result.data.user.email || null,
+              image: result.data.user.image || null,
+              isAnonymous: true,
+            })
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load user session:", error)
+      } finally {
+        setIsLoadingUser(false)
+      }
+    }
+    loadUser()
+  }, [])
 
   const generate = async (input: GenerateInput) => {
     setIsGenerating(true)
@@ -122,6 +191,32 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setStreak((s) => s + 1)
   }
 
+  const signInWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/",
+    })
+  }
+
+  const signInWithEmail = async (email: string) => {
+    const res = await fetch("/api/auth/magic-link/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    })
+    if (!res.ok) {
+      const error = await res.json()
+      throw new Error(error.message || "Error al enviar enlace mágico")
+    }
+  }
+
+  const signOut = async () => {
+    await authClient.signOut()
+    setUser(null)
+    setRateLimitRemaining(10)
+    setRateLimitResetAt(null)
+  }
+
   const value: StudyState = {
     view,
     setView,
@@ -142,6 +237,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     endLesson: () => setLessonNodeId(null),
     theme,
     toggleTheme: () => setTheme((t) => (t === "dark" ? "light" : "dark")),
+    user,
+    isLoadingUser,
+    signInWithGoogle,
+    signInWithEmail,
+    signOut,
+    rateLimitRemaining,
+    rateLimitResetAt,
   }
 
   return <StudyContext.Provider value={value}>{children}</StudyContext.Provider>
