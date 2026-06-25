@@ -40,7 +40,7 @@ export const knowledgeNodeSchema = z.object({
   examples: z.array(z.string()).min(1).max(2),
   level: z.number().int().min(0).max(10),
   deps: z.array(z.string()),
-  steps: z.array(lessonStepSchema).min(4).max(10),
+  steps: z.array(lessonStepSchema).min(3).max(10),
 })
 
 /** Schema for LLM structured output (without map metadata). */
