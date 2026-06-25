@@ -82,7 +82,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   // Auth state
   const [user, setUser] = useState<User | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
-  const [rateLimitRemaining, setRateLimitRemaining] = useState(10)
+  const [rateLimitRemaining, setRateLimitRemaining] = useState(3)
   const [rateLimitResetAt, setRateLimitResetAt] = useState<Date | null>(null)
 
   useEffect(() => {
@@ -97,26 +97,34 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       try {
         const session = await authClient.getSession()
         const sessionData = session.data
-        
+
         if (sessionData && sessionData.user) {
-          setUser({
+          const u = {
             id: sessionData.user.id,
             name: sessionData.user.name,
             email: sessionData.user.email || null,
             image: sessionData.user.image || null,
             isAnonymous: sessionData.user.isAnonymous || false,
-          })
+          }
+          setUser(u)
+          setRateLimitRemaining(u.isAnonymous ? 3 : 10)
+          if (u.isAnonymous) {
+            localStorage.setItem("studymap:anonymousId", u.id)
+          }
         } else {
           // Sign in anonymously if no session
           const result = await authClient.signIn.anonymous()
           if (result.data?.user) {
-            setUser({
+            const u = {
               id: result.data.user.id,
               name: result.data.user.name,
               email: result.data.user.email || null,
               image: result.data.user.image || null,
               isAnonymous: true,
-            })
+            }
+            setUser(u)
+            setRateLimitRemaining(3)
+            localStorage.setItem("studymap:anonymousId", u.id)
           }
         }
       } catch (error) {
@@ -143,7 +151,12 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         body: formData,
       })
 
-      const data = (await res.json()) as { map?: StudyMap; error?: string }
+      const data = (await res.json()) as {
+        map?: StudyMap
+        error?: string
+        remaining?: number | null
+        resetAt?: string | null
+      }
 
       if (!res.ok) {
         throw new Error(data.error ?? "No se pudo generar el mapa")
@@ -151,6 +164,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
       if (!data.map) {
         throw new Error("Respuesta inválida del servidor")
+      }
+
+      if (typeof data.remaining === "number") {
+        setRateLimitRemaining(data.remaining)
+      }
+      if (data.resetAt) {
+        setRateLimitResetAt(new Date(data.resetAt))
       }
 
       setMap(data.map)
@@ -212,9 +232,32 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await authClient.signOut()
-    setUser(null)
-    setRateLimitRemaining(10)
-    setRateLimitResetAt(null)
+    // Recreate anonymous session immediately
+    try {
+      const result = await authClient.signIn.anonymous()
+      if (result.data?.user) {
+        const u = {
+          id: result.data.user.id,
+          name: result.data.user.name,
+          email: result.data.user.email || null,
+          image: result.data.user.image || null,
+          isAnonymous: true,
+        }
+        setUser(u)
+        setRateLimitRemaining(3)
+        setRateLimitResetAt(null)
+        localStorage.setItem("studymap:anonymousId", u.id)
+      } else {
+        setUser(null)
+        setRateLimitRemaining(3)
+        setRateLimitResetAt(null)
+      }
+    } catch (error) {
+      console.error("Failed to create anonymous session after sign out:", error)
+      setUser(null)
+      setRateLimitRemaining(3)
+      setRateLimitResetAt(null)
+    }
   }
 
   const value: StudyState = {

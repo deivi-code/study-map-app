@@ -53,7 +53,7 @@ export function AuthButton({ className }: { className?: string }) {
     )
   }
 
-  if (user) {
+  if (user && !user.isAnonymous) {
     return (
       <div className="relative">
         <button

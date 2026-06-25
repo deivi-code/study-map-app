@@ -5,7 +5,9 @@ import { Resend } from "resend"
 import { db } from "@/lib/db"
 import * as schema from "@/lib/db/schema"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
@@ -19,7 +21,16 @@ export const auth = betterAuth({
     },
   }),
   plugins: [
-    anonymous(),
+    anonymous({
+      onLinkAccount: async ({ anonymousUser, newUser }) => {
+        try {
+          const { migrateAnonymousData } = await import("@/lib/auth/migration")
+          await migrateAnonymousData(anonymousUser.user.id, newUser.user.id)
+        } catch (error) {
+          console.error("Failed to migrate anonymous data:", error)
+        }
+      },
+    }),
   ],
   emailAndPassword: {
     enabled: false,
@@ -27,7 +38,7 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     async sendVerificationEmail({ user, url }) {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: process.env.RESEND_FROM_EMAIL || "noreply@studymap.naria.es",
         to: user.email,
         subject: "Verifica tu correo electrónico",
@@ -49,7 +60,7 @@ export const auth = betterAuth({
   magicLink: {
     enabled: true,
     async sendMagicLink({ email, url }: { email: string; url: string }) {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: process.env.RESEND_FROM_EMAIL || "noreply@studymap.naria.es",
         to: email,
         subject: "Enlace mágico para iniciar sesión",

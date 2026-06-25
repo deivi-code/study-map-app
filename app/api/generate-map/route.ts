@@ -19,18 +19,29 @@ export async function POST(request: Request) {
     const userId = session?.user?.id || null
 
     // Check rate limit
+    let rateLimitInfo: { remaining: number; resetAt: Date } | null = null
     if (userId && session) {
       const limit = session.user.isAnonymous ? await getAnonymousLimit() : await getAuthenticatedLimit()
       const rateLimitResult = await checkRateLimit(userId, "create_map", limit)
-      
+
       if (!rateLimitResult.allowed) {
+        const resetStr = rateLimitResult.resetAt.toLocaleString("es-ES", {
+          dateStyle: "short",
+          timeStyle: "short",
+        })
         return NextResponse.json(
-          { 
-            error: "Has alcanzado el límite de itinerarios. Intenta de nuevo más tarde.",
+          {
+            error: `Has alcanzado el límite de ${limit} itinerarios. Podrás crear más a partir del ${resetStr}.`,
             resetAt: rateLimitResult.resetAt,
+            remaining: 0,
           },
           { status: 429 },
         )
+      }
+
+      rateLimitInfo = {
+        remaining: rateLimitResult.remaining,
+        resetAt: rateLimitResult.resetAt,
       }
     }
 
@@ -64,7 +75,12 @@ export async function POST(request: Request) {
       savedMap = { ...map, id: mapId }
     }
 
-    return NextResponse.json({ map: savedMap, usedAi })
+    return NextResponse.json({
+      map: savedMap,
+      usedAi,
+      remaining: rateLimitInfo?.remaining ?? null,
+      resetAt: rateLimitInfo?.resetAt ?? null,
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Error al generar el mapa"
     console.error("[api/generate-map]", err)
