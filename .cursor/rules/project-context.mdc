@@ -1,0 +1,27 @@
+---
+description: Contexto del proyecto Mapa de Estudio — lee la documentación antes de editar
+alwaysApply: true
+---
+
+# Mapa de Estudio — contexto del proyecto
+
+Antes de modificar código, consulta la documentación del repositorio:
+
+- `AGENTS.md` — resumen y reglas críticas
+- `docs/README.md` — visión general e índice
+- `docs/TECHNOLOGIES.md` — stack y configuración
+- `docs/THEME.md` — diseño, colores, patrones UI
+- `docs/COMPONENTS.md` — componentes y `useStudy()`
+- `docs/ARCHITECTURE.md` — estructura, tipos, flujo de datos
+
+## Reglas al editar
+
+1. UI en **español**; tema **oscuro** por defecto con variables CSS (`--primary`, `--mastery-*`)
+2. Estado global en `lib/store.tsx`; lógica de dominio en `lib/study.ts`
+3. Componentes interactivos con `"use client"`; imports con alias `@/`
+4. Sin backend ni persistencia salvo solicitud explícita
+5. Cambios mínimos y focalizados; seguir convenciones existentes
+
+## Archivos clave
+
+`app/page.tsx` · `lib/store.tsx` · `lib/study.ts` · `lib/templates.ts` · `components/app-shell.tsx`
