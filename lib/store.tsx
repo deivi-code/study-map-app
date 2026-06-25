@@ -85,6 +85,29 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [rateLimitRemaining, setRateLimitRemaining] = useState(3)
   const [rateLimitResetAt, setRateLimitResetAt] = useState<Date | null>(null)
 
+  // Load persisted state from the database for an authenticated user
+  const loadState = async () => {
+    try {
+      const res = await fetch("/api/load-state")
+      if (!res.ok) return
+      const data = (await res.json()) as {
+        map?: StudyMap | null
+        progress?: ProgressMap
+        streak?: number
+      }
+      if (data.map) {
+        setMap(data.map)
+        setProgress(data.progress ?? {})
+        setView("app")
+      }
+      if (typeof data.streak === "number") {
+        setStreak(data.streak)
+      }
+    } catch (err) {
+      console.error("Failed to load state:", err)
+    }
+  }
+
   useEffect(() => {
     const root = document.documentElement
     if (theme === "dark") root.classList.add("dark")
@@ -110,6 +133,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
           setRateLimitRemaining(u.isAnonymous ? 3 : 10)
           if (u.isAnonymous) {
             localStorage.setItem("studymap:anonymousId", u.id)
+          } else {
+            // Authenticated user — load persisted state from DB
+            await loadState()
           }
         } else {
           // Sign in anonymously if no session
