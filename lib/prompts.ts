@@ -36,7 +36,11 @@ REGLAS ADICIONALES:
 - Mínimo 2 pasos evaluables (choice o text) por nodo.
 - No pongas theory antes de cada pregunta; intercala teoría solo cuando sea necesario.
 - Las preguntas evalúan comprensión, no memorización trivial.
-- TODOS los campos son OBLIGATORIOS para cada step.`
+- TODOS los campos son OBLIGATORIOS para cada step.
+
+IMPORTANTE:
+- examples debe contener EXACTAMENTE 1 o 2 elementos.
+- No uses símbolos aislados como ejemplo.`
 
 export function buildUserPrompt(content: string, retryError?: string): string {
   const truncated =

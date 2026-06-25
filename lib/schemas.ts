@@ -37,7 +37,7 @@ export const knowledgeNodeSchema = z.object({
   title: z.string().min(2),
   summary: z.string().min(10),
   detail: z.string().min(20),
-  examples: z.array(z.string().min(5)).min(1).max(3),
+  examples: z.array(z.string()).min(1).max(2),
   level: z.number().int().min(0).max(10),
   deps: z.array(z.string()),
   steps: z.array(lessonStepSchema).min(4).max(10),
