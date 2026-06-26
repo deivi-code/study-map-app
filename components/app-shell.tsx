@@ -2,14 +2,14 @@
 
 import { useState } from "react"
 import { useStudy } from "@/lib/store"
-import { Logo, ThemeToggle } from "@/components/brand"
+import { Logo, ThemeToggle, AuthButton } from "@/components/brand"
 import { Landing } from "@/components/landing"
 import { UploadScreen } from "@/components/upload-screen"
 import { SkillTree } from "@/components/skill-tree"
 import { NodeDrawer } from "@/components/node-drawer"
 import { LessonMode } from "@/components/lesson-mode"
 import { Dashboard } from "@/components/dashboard"
-import { Map, BarChart3, Plus } from "lucide-react"
+import { Map, ChartBar as BarChart3, Plus, Sparkles } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 type Tab = "tree" | "dashboard"
@@ -48,8 +48,10 @@ function NavButton({
 }
 
 export function AppShell() {
-  const { view, setView, map, lessonNodeId } = useStudy()
+  const { view, setView, map, lessonNodeId, user, rateLimitRemaining } = useStudy()
   const [tab, setTab] = useState<Tab>("tree")
+
+  const isAuthenticated = !!user && !user.isAnonymous
 
   if (view === "landing") {
     return <Landing />
@@ -94,6 +96,13 @@ export function AppShell() {
               <Plus className="h-4 w-4" />
               Nuevo mapa
             </button>
+            {isAuthenticated && (
+              <span className="hidden items-center gap-1.5 rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-xs text-muted-foreground sm:flex">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                {rateLimitRemaining} itinerarios restantes
+              </span>
+            )}
+            <AuthButton />
             <ThemeToggle />
           </div>
         </div>

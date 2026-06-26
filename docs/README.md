@@ -9,7 +9,7 @@ Documentación de referencia para agentes y desarrolladores que trabajen en este
 - Idioma de la UI: **español** (`lang="es"` en el layout)
 - Modo oscuro por defecto, con toggle claro/oscuro
 - Sin backend ni autenticación: todo el estado vive en memoria del cliente
-- La generación de mapas es **simulada** (plantillas locales, no IA real)
+- La generación de mapas es con IA (Gemini) con fallback a plantillas locales
 
 ## Índice de documentos
 

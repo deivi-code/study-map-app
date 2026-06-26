@@ -1,14 +1,22 @@
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
-import { ArrowLeft, FileText, Loader2, Sparkles, Upload, X } from "lucide-react"
+import { ArrowLeft, FileText, Loader as Loader2, Sparkles, Upload, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useStudy } from "@/lib/store"
 import { loaderSteps } from "@/lib/study"
 import { Logo, ThemeToggle } from "./brand"
 
 export function UploadScreen() {
-  const { setView, generate, isGenerating, generateError, clearGenerateError } = useStudy()
+  const {
+    setView,
+    generate,
+    isGenerating,
+    generateError,
+    clearGenerateError,
+    user,
+    rateLimitRemaining,
+  } = useStudy()
   const [text, setText] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -16,6 +24,10 @@ export function UploadScreen() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const canGenerate = text.trim().length > 8 || !!file
+  const isAnonymous = !user || user.isAnonymous
+  const maxItineraries = isAnonymous ? 3 : 10
+  const remaining = rateLimitRemaining
+  const lowThreshold = isAnonymous ? 1 : 3
 
   useEffect(() => {
     if (!isGenerating) return
@@ -163,9 +175,27 @@ export function UploadScreen() {
                 </p>
               )}
 
+              <div className="mt-4 flex items-center justify-center gap-2 text-xs">
+                <span
+                  className={
+                    remaining === 0
+                      ? "font-medium text-mastery-red"
+                      : remaining <= lowThreshold
+                        ? "font-medium text-mastery-amber"
+                        : "text-muted-foreground"
+                  }
+                >
+                  {remaining === 0
+                    ? `Límite alcanzado. Podrás crear más itinerarios más tarde.`
+                    : `Te quedan ${remaining} de ${maxItineraries} itinerarios${
+                        isAnonymous ? " (modo invitado)" : ""
+                      }`}
+                </span>
+              </div>
+
               <button
                 onClick={runGeneration}
-                disabled={!canGenerate}
+                disabled={!canGenerate || remaining === 0}
                 className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Sparkles className="size-4" />

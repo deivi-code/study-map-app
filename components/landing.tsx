@@ -11,7 +11,7 @@ import {
   Upload,
 } from "lucide-react"
 import { useStudy } from "@/lib/store"
-import { Logo, ThemeToggle } from "./brand"
+import { AuthButton, Logo, ThemeToggle } from "./brand"
 import { NodeField } from "./node-field"
 
 const features = [
@@ -124,6 +124,7 @@ export function Landing() {
             >
               Empezar
             </button>
+            <AuthButton />
           </div>
         </header>
 
