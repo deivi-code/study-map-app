@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, and } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { studyMap, nodeProgress, userStats } from "@/lib/db/schema"
 import { auth } from "@/lib/auth"
@@ -8,7 +8,7 @@ import type { KnowledgeNode, ProgressMap, StudyMap } from "@/lib/types"
 
 export const runtime = "nodejs"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -19,31 +19,46 @@ export async function GET() {
     }
 
     const userId = session.user.id
+    const { searchParams } = new URL(request.url)
+    const mapId = searchParams.get("mapId")
 
-    const [latestMap] = await db
-      .select()
-      .from(studyMap)
-      .where(eq(studyMap.userId, userId))
-      .orderBy(desc(studyMap.createdAt))
-      .limit(1)
+    let selectedMap = null
+    if (mapId) {
+      // Load specific map by ID
+      const [map] = await db
+        .select()
+        .from(studyMap)
+        .where(and(eq(studyMap.id, mapId), eq(studyMap.userId, userId)))
+        .limit(1)
+      selectedMap = map
+    } else {
+      // Load latest map (default behavior)
+      const [map] = await db
+        .select()
+        .from(studyMap)
+        .where(eq(studyMap.userId, userId))
+        .orderBy(desc(studyMap.createdAt))
+        .limit(1)
+      selectedMap = map
+    }
 
     let map: StudyMap | null = null
-    if (latestMap) {
+    if (selectedMap) {
       map = {
-        id: latestMap.id,
-        subject: latestMap.title,
-        source: latestMap.sourceType ?? "",
-        createdAt: latestMap.createdAt.getTime(),
-        nodes: latestMap.nodes as KnowledgeNode[],
+        id: selectedMap.id,
+        subject: selectedMap.title,
+        source: selectedMap.sourceType ?? "",
+        createdAt: selectedMap.createdAt.getTime(),
+        nodes: selectedMap.nodes as KnowledgeNode[],
       }
     }
 
     let progress: ProgressMap = {}
-    if (latestMap) {
+    if (selectedMap) {
       const progressRows = await db
         .select()
         .from(nodeProgress)
-        .where(eq(nodeProgress.mapId, latestMap.id))
+        .where(eq(nodeProgress.mapId, selectedMap.id))
 
       progress = Object.fromEntries(
         progressRows.map((row) => [
