@@ -3,6 +3,16 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { authClient } from "./auth-client"
 
+const AUTH_COOKIE = "studymap:authenticated"
+
+function setAuthCookie() {
+  document.cookie = `${AUTH_COOKIE}=1; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+}
+
+function clearAuthCookie() {
+  document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0; SameSite=Lax`
+}
+
 interface User {
   id: string
   name: string | null
@@ -44,8 +54,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setRateLimitRemaining(u.isAnonymous ? 3 : 10)
         if (u.isAnonymous) {
           localStorage.setItem("studymap:anonymousId", u.id)
+          clearAuthCookie()
+        } else {
+          localStorage.removeItem("studymap:anonymousId")
+          setAuthCookie()
         }
       } else {
+        clearAuthCookie()
         const result = await authClient.signIn.anonymous()
         if (result.data?.user) {
           const u = {

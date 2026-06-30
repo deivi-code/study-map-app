@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowRight, BookOpen, Check, Loader2, RotateCcw, Sparkles, X } from "lucide-react"
+import Link from "next/link"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { checkTextAnswer } from "@/lib/answer-check"
 import { countAssessableSteps, isAssessableStep } from "@/lib/lesson"
@@ -12,7 +13,7 @@ import { masteryFromScore, masteryMeta } from "@/lib/study"
 import type { ChoiceStep, TextStep, TheoryStep } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-export function LessonMode({ onClose: externalClose }: { onClose?: () => void }) {
+export function LessonMode({ onClose: externalClose, mapId }: { onClose?: () => void; mapId?: string }) {
   const { map, lessonNodeId, endLesson } = useStudy()
   const node = map?.nodes.find((n) => n.id === lessonNodeId) ?? null
   const handleClose = externalClose ?? endLesson
@@ -26,14 +27,14 @@ export function LessonMode({ onClose: externalClose }: { onClose?: () => void })
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[60] flex flex-col bg-background"
         >
-          <LessonRunner key={node.id} nodeId={node.id} onClose={handleClose} />
+          <LessonRunner key={node.id} nodeId={node.id} onClose={handleClose} mapId={mapId ?? map?.id} />
         </motion.div>
       )}
     </AnimatePresence>
   )
 }
 
-function ConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+function ConfirmDialog({ onConfirm, onCancel, mapId }: { onConfirm: () => void; onCancel: () => void; mapId?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -56,19 +57,20 @@ function ConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCance
           >
             Continuar
           </button>
-          <button
+          <Link
+            href={`/app/${mapId}`}
             onClick={onConfirm}
             className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:opacity-90"
           >
             Salir
-          </button>
+          </Link>
         </div>
       </motion.div>
     </motion.div>
   )
 }
 
-function LessonRunner({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
+function LessonRunner({ nodeId, onClose, mapId }: { nodeId: string; onClose: () => void; mapId?: string }) {
   const { map, recordLesson, closeNode } = useStudy()
   const node = map!.nodes.find((n) => n.id === nodeId)!
   const steps = node.steps
@@ -131,6 +133,7 @@ function LessonRunner({ nodeId, onClose }: { nodeId: string; onClose: () => void
           onClose={onClose}
           onRetry={handleRetry}
           closeNode={closeNode}
+          mapId={mapId}
         />
       </>
     )
@@ -208,6 +211,7 @@ function LessonRunner({ nodeId, onClose }: { nodeId: string; onClose: () => void
         <ConfirmDialog
           onConfirm={onClose}
           onCancel={() => setShowExitConfirm(false)}
+          mapId={mapId}
         />
       )}
     </>
@@ -495,6 +499,7 @@ function Results({
   onClose,
   onRetry,
   closeNode,
+  mapId,
 }: {
   node: { title: string }
   score: number
@@ -503,6 +508,7 @@ function Results({
   onClose: () => void
   onRetry: () => void
   closeNode: () => void
+  mapId?: string
 }) {
   const mastery = masteryFromScore(score)
   const meta = masteryMeta[mastery]
@@ -559,15 +565,12 @@ function Results({
       <p className="mt-2 text-muted-foreground">{meta.coach}</p>
 
       <div className="mt-8 flex w-full flex-col gap-3">
-        <button
-          onClick={() => {
-            onClose()
-            closeNode()
-          }}
+        <Link
+          href={`/app/${mapId}`}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01]"
         >
           Volver al mapa
-        </button>
+        </Link>
         <button
           onClick={onRetry}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3.5 text-sm font-medium transition-colors hover:bg-accent"
