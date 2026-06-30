@@ -12,7 +12,6 @@ import {
 } from "lucide-react"
 import { AuthButton, Logo, ThemeToggle } from "./brand"
 import { NodeField } from "./node-field"
-import { OnboardingOverlay } from "./onboarding-overlay"
 import Link from "next/link"
 
 const features = [
@@ -107,7 +106,6 @@ function MiniTree() {
 
 export function Landing() {
   return (
-    <>
     <div className="relative min-h-screen overflow-hidden">
       <NodeField className="pointer-events-none absolute inset-0 opacity-70" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(60%_80%_at_50%_0%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent)]" />
@@ -261,7 +259,5 @@ export function Landing() {
         </section>
       </div>
     </div>
-    <OnboardingOverlay />
-  </>
   )
 }

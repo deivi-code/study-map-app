@@ -61,13 +61,6 @@ export default function RootLayout({
           </ThemeProvider>
         </AuthProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
-        {process.env.NODE_ENV === 'production' && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js")`,
-            }}
-          />
-        )}
       </body>
     </html>
   )
