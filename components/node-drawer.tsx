@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
 import { Check, Lightbulb, Play, RotateCcw, X } from "lucide-react"
 import { lessonStepSummary } from "@/lib/lesson"
@@ -7,7 +8,7 @@ import { useStudy } from "@/lib/store"
 import { getMastery, masteryMeta } from "@/lib/study"
 
 export function NodeDrawer() {
-  const { map, activeNodeId, closeNode, progress, startLesson } = useStudy()
+  const { map, activeNodeId, closeNode, progress } = useStudy()
   const node = map?.nodes.find((n) => n.id === activeNodeId) ?? null
 
   return (
@@ -115,13 +116,13 @@ export function NodeDrawer() {
                   </div>
 
                   <footer className="border-t border-border p-6">
-                    <button
-                      onClick={() => startLesson(node.id)}
+                    <Link
+                      href={`/app/${map!.id}/lesson/${node.id}`}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.01]"
                     >
                       {p ? <RotateCcw className="size-4" /> : <Play className="size-4" />}
                       {p ? "Repetir lección" : "Empezar lección"}
-                    </button>
+                    </Link>
                   </footer>
                 </>
               )

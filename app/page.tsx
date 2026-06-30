@@ -1,10 +1,5 @@
-import { StudyProvider } from "@/lib/store"
-import { AppShell } from "@/components/app-shell"
+import { Landing } from "@/components/landing"
 
 export default function Page() {
-  return (
-    <StudyProvider>
-      <AppShell />
-    </StudyProvider>
-  )
+  return <Landing />
 }

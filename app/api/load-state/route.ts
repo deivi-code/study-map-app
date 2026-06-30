@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { studyMap, nodeProgress, userStats } from "@/lib/db/schema"
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
+import { intToMastery } from "@/lib/study"
 import type { KnowledgeNode, ProgressMap, StudyMap } from "@/lib/types"
 
 export const runtime = "nodejs"
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
           row.nodeId,
           {
             score: row.bestScore,
-            mastery: row.mastery as ProgressMap[string]["mastery"],
+            mastery: intToMastery(row.mastery),
             attempts: row.attempts,
           },
         ]),

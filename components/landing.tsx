@@ -10,9 +10,9 @@ import {
   Trophy,
   Upload,
 } from "lucide-react"
-import { useStudy } from "@/lib/store"
 import { AuthButton, Logo, ThemeToggle } from "./brand"
 import { NodeField } from "./node-field"
+import Link from "next/link"
 
 const features = [
   {
@@ -105,8 +105,6 @@ function MiniTree() {
 }
 
 export function Landing() {
-  const { setView } = useStudy()
-
   return (
     <div className="relative min-h-screen overflow-hidden">
       <NodeField className="pointer-events-none absolute inset-0 opacity-70" />
@@ -118,12 +116,12 @@ export function Landing() {
           <Logo />
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <button
-              onClick={() => setView("upload")}
+            <Link
+              href="/upload"
               className="hidden rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.03] sm:block"
             >
               Empezar
-            </button>
+            </Link>
             <AuthButton />
           </div>
         </header>
@@ -148,14 +146,14 @@ export function Landing() {
               nodos superando tests y descubre con exactitud qué dominas y qué te falta.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setView("upload")}
+              <Link
+                href="/upload"
                 className="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.03]"
               >
                 <Upload className="size-4" />
                 Subir apuntes
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
+              </Link>
               <span className="text-sm text-muted-foreground">Sin registro · Gratis</span>
             </div>
 
@@ -247,13 +245,13 @@ export function Landing() {
             <p className="mx-auto mt-3 max-w-md text-muted-foreground">
               Sube tus apuntes y construye tu primer mapa de conocimiento en segundos.
             </p>
-            <button
-              onClick={() => setView("upload")}
+            <Link
+              href="/upload"
               className="mt-7 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.03]"
             >
               <Upload className="size-4" />
               Subir apuntes
-            </button>
+            </Link>
           </div>
           <p className="mt-10 text-center text-xs text-muted-foreground">
             Mapa de Estudio · Tu coach académico personal
