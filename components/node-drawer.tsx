@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
-import { Check, Lightbulb, Play, RotateCcw, X } from "lucide-react"
+import { Check, Lightbulb, Lock, Play, RotateCcw, X } from "lucide-react"
+import { useEffect, useRef } from "react"
 import { lessonStepSummary } from "@/lib/lesson"
 import { useStudy } from "@/lib/store"
 import { getMastery, masteryMeta } from "@/lib/study"
@@ -10,6 +11,42 @@ import { getMastery, masteryMeta } from "@/lib/study"
 export function NodeDrawer() {
   const { map, activeNodeId, closeNode, progress } = useStudy()
   const node = map?.nodes.find((n) => n.id === activeNodeId) ?? null
+  const drawerRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (activeNodeId) {
+      previousFocusRef.current = document.activeElement as HTMLElement
+    }
+  }, [activeNodeId])
+
+  useEffect(() => {
+    if (!activeNodeId) return
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        closeNode()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [activeNodeId, closeNode])
+
+  useEffect(() => {
+    if (!activeNodeId || !drawerRef.current) return
+
+    const focusable = drawerRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
+    if (focusable.length > 0) {
+      focusable[0].focus()
+    }
+
+    return () => {
+      previousFocusRef.current?.focus()
+    }
+  }, [activeNodeId])
 
   return (
     <AnimatePresence>
@@ -23,6 +60,7 @@ export function NodeDrawer() {
             className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
           />
           <motion.aside
+            ref={drawerRef}
             key={node.id}
             initial={{ x: "100%", opacity: 0.5 }}
             animate={{ x: 0, opacity: 1 }}
@@ -30,6 +68,7 @@ export function NodeDrawer() {
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
             className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-border bg-card shadow-2xl"
             role="dialog"
+            aria-modal="true"
             aria-label={node.title}
           >
             {(() => {
@@ -38,6 +77,16 @@ export function NodeDrawer() {
               const p = progress[node.id]
               const pct = m === "green" ? 100 : p?.score ?? 0
               const { total, theory, assessable } = lessonStepSummary(node.steps)
+              const locked = m === "locked"
+              const deps = locked
+                ? node.deps
+                    .map((depId) => {
+                      const dep = map?.nodes.find((n) => n.id === depId)
+                      return dep ? { id: dep.id, title: dep.title, mastery: getMastery(dep.id, dep, progress) } : null
+                    })
+                    .filter(Boolean)
+                : []
+
               return (
                 <>
                   <header className="flex items-start justify-between gap-4 border-b border-border p-6">
@@ -64,6 +113,31 @@ export function NodeDrawer() {
                   </header>
 
                   <div className="flex-1 space-y-6 overflow-y-auto p-6">
+                    {locked && deps.length > 0 && (
+                      <div className="rounded-xl border border-mastery-locked/30 bg-mastery-locked/10 p-4">
+                        <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+                          <Lock className="size-4" />
+                          Requisitos para desbloquear
+                        </h3>
+                        <ul className="mt-3 space-y-2">
+                          {deps.map((dep) => dep && (
+                            <li key={dep.id} className="flex items-center gap-2 text-sm">
+                              <span
+                                className="size-2 rounded-full"
+                                style={{ background: masteryMeta[dep.mastery].color }}
+                              />
+                              <span className={dep.mastery === "locked" ? "text-muted-foreground" : ""}>
+                                {dep.title}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {masteryMeta[dep.mastery].label}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
                     <div>
                       <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
                         <span>Progreso del nodo</span>
@@ -116,13 +190,19 @@ export function NodeDrawer() {
                   </div>
 
                   <footer className="border-t border-border p-6">
-                    <Link
-                      href={`/app/${map!.id}/lesson/${node.id}`}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.01]"
-                    >
-                      {p ? <RotateCcw className="size-4" /> : <Play className="size-4" />}
-                      {p ? "Repetir lección" : "Empezar lección"}
-                    </Link>
+                    {locked ? (
+                      <div className="rounded-xl border border-border bg-muted/30 p-3 text-center text-sm text-muted-foreground">
+                        Desbloquea los requisitos para acceder
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/app/${map!.id}/lesson/${node.id}`}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.01]"
+                      >
+                        {p ? <RotateCcw className="size-4" /> : <Play className="size-4" />}
+                        {p ? "Repetir lección" : "Empezar lección"}
+                      </Link>
+                    )}
                   </footer>
                 </>
               )

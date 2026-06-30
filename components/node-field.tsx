@@ -57,16 +57,19 @@ export function NodeField({ className }: { className?: string }) {
       const color = accent()
       ctx!.clearRect(0, 0, width, height)
 
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i]
-        if (!reduce) {
+      if (!reduce) {
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i]
           p.x += p.vx
           p.y += p.vy
           if (p.x < 0 || p.x > width) p.vx *= -1
           if (p.y < 0 || p.y > height) p.vy *= -1
         }
+      }
 
+      for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
+          const p = particles[i]
           const q = particles[j]
           const dx = p.x - q.x
           const dy = p.y - q.y
@@ -92,7 +95,9 @@ export function NodeField({ className }: { className?: string }) {
       }
       ctx!.globalAlpha = 1
 
-      raf = requestAnimationFrame(draw)
+      if (!reduce) {
+        raf = requestAnimationFrame(draw)
+      }
     }
 
     resize()

@@ -10,6 +10,34 @@ import { cn } from "@/lib/utils"
 
 const NODE = 76
 
+function LoadingSkeleton() {
+  const items = Array.from({ length: 8 }, (_, i) => ({
+    id: i,
+    level: Math.floor(i / 3),
+    delay: i * 0.06,
+  }))
+
+  return (
+    <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+      <div className="space-y-6">
+        {[0, 1, 2].map((row) => (
+          <div key={row} className="flex justify-center gap-8">
+            {items
+              .filter((n) => n.level === row)
+              .map((n) => (
+                <div
+                  key={n.id}
+                  className="animate-pulse rounded-full bg-muted"
+                  style={{ width: NODE, height: NODE }}
+                />
+              ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function SkillTree() {
   const { map, progress, openNode } = useStudy()
   const { positioned, width, height } = useMemo(
@@ -17,13 +45,15 @@ export function SkillTree() {
     [map],
   )
 
+  if (!map || !positioned.length) return <LoadingSkeleton />
+
   return (
     <>
       <div className="hidden lg:block">
         <GraphView positioned={positioned} width={width} height={height} progress={progress} onOpen={openNode} />
       </div>
       <div className="lg:hidden">
-        <ListView positioned={positioned} progress={progress} onOpen={openNode} />
+        <ListView positioned={positioned} progress={progress} map={map} onOpen={openNode} />
       </div>
     </>
   )
@@ -52,6 +82,8 @@ function GraphView({
     oy: 0,
   })
 
+  const container = containerRef.current
+
   const center = () => {
     const c = containerRef.current
     if (!c) return
@@ -61,7 +93,6 @@ function GraphView({
 
   useEffect(() => {
     center()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height])
 
   useEffect(() => {
@@ -78,13 +109,20 @@ function GraphView({
     return () => c.removeEventListener("wheel", onWheel)
   }, [])
 
+  const parentMap = new Map<string, PositionedNode>()
+  for (const n of positioned) {
+    parentMap.set(n.id, n)
+  }
+
   return (
     <div
       ref={containerRef}
       className="relative h-[calc(100vh-4rem)] w-full touch-none overflow-hidden bg-[radial-gradient(100%_100%_at_50%_0%,color-mix(in_oklch,var(--primary)_7%,transparent),transparent)]"
       onPointerDown={(e) => {
         drag.current = { active: true, sx: e.clientX, sy: e.clientY, ox: t.x, oy: t.y }
-        ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+        if (e.target instanceof HTMLElement) {
+          try { e.target.setPointerCapture(e.pointerId) } catch {}
+        }
       }}
       onPointerMove={(e) => {
         if (!drag.current.active) return
@@ -97,8 +135,10 @@ function GraphView({
       onPointerUp={() => (drag.current.active = false)}
       onPointerLeave={() => (drag.current.active = false)}
       style={{ cursor: drag.current.active ? "grabbing" : "grab" }}
+      role="application"
+      aria-label="Mapa de conocimiento. Arrastra para mover, rueda para zoom."
+      tabIndex={0}
     >
-      {/* subtle dot grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.4]"
         style={{
@@ -115,7 +155,7 @@ function GraphView({
         <svg width={width} height={height} className="absolute left-0 top-0 overflow-visible">
           {positioned.flatMap((node) =>
             node.deps.map((depId) => {
-              const parent = positioned.find((n) => n.id === depId)
+              const parent = parentMap.get(depId)
               if (!parent) return null
               const m = getMastery(node.id, node, progress)
               const lit = m !== "locked"
@@ -154,7 +194,6 @@ function GraphView({
         })}
       </div>
 
-      {/* Zoom controls */}
       <div className="absolute bottom-5 right-5 flex flex-col gap-1.5 rounded-xl border border-border bg-card/80 p-1.5 backdrop-blur">
         <ZoomBtn label="Acercar" onClick={() => setT((p) => ({ ...p, s: Math.min(1.8, p.s + 0.15) }))}>
           <Plus className="size-4" />
@@ -188,7 +227,7 @@ function ZoomBtn({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      className="grid size-10 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground touch-manipulation"
     >
       {children}
     </button>
@@ -220,6 +259,7 @@ function GraphNode({
         e.stopPropagation()
         onOpen()
       }}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onOpen() }}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.2 + index * 0.05, type: "spring", stiffness: 200, damping: 16 }}
@@ -229,9 +269,10 @@ function GraphNode({
         locked ? "cursor-not-allowed" : "cursor-pointer",
       )}
       style={{ left: node.x, top: node.y, transform: "translate(-50%, -50%)", width: 150 }}
+      tabIndex={locked ? -1 : 0}
+      aria-label={`${node.title} - ${meta.label}`}
     >
       <span className="relative grid place-items-center" style={{ width: NODE, height: NODE }}>
-        {/* glow */}
         {!locked && (
           <motion.span
             className="absolute inset-0 rounded-full"
@@ -287,10 +328,12 @@ function GraphNode({
 function ListView({
   positioned,
   progress,
+  map,
   onOpen,
 }: {
   positioned: PositionedNode[]
   progress: ProgressMap
+  map: { nodes: { id: string; title: string }[] }
   onOpen: (id: string) => void
 }) {
   const ordered = [...positioned].sort((a, b) => a.level - b.level)
@@ -301,6 +344,9 @@ function ListView({
         const meta = masteryMeta[m]
         const locked = m === "locked"
         const pct = m === "green" ? 100 : progress[node.id]?.score ?? 0
+        const deps = node.deps
+          .map((depId) => map.nodes.find((n) => n.id === depId))
+          .filter(Boolean)
         return (
           <motion.button
             key={node.id}
@@ -314,6 +360,7 @@ function ListView({
               "flex w-full items-center gap-3.5 rounded-2xl border border-border bg-card/60 p-3.5 text-left transition-colors",
               locked ? "opacity-60" : "hover:border-primary/40",
             )}
+            aria-label={`${node.title} - ${meta.label}${deps.length > 0 ? `. Requiere: ${deps.map((d) => d?.title).join(", ")}` : ""}`}
           >
             <span
               className="grid size-11 shrink-0 place-items-center rounded-full text-xs font-semibold"
@@ -330,6 +377,11 @@ function ListView({
               <span className="text-xs" style={{ color: locked ? "var(--muted-foreground)" : meta.color }}>
                 {meta.label}
               </span>
+              {deps.length > 0 && (
+                <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
+                  Requiere: {deps.map((d) => d?.title).join(", ")}
+                </span>
+              )}
             </span>
           </motion.button>
         )
@@ -337,3 +389,5 @@ function ListView({
     </div>
   )
 }
+
+

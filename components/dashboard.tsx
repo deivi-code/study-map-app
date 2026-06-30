@@ -1,13 +1,32 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { CheckCircle2, Flame, Target, TrendingUp } from "lucide-react"
+import { CheckCircle2, Flame, Target, TrendingUp, FileQuestion } from "lucide-react"
 import { useStudy } from "@/lib/store"
 import { computeStats, getMastery, masteryMeta } from "@/lib/study"
+import Link from "next/link"
 
 export function Dashboard() {
   const { map, progress, streak, openNode } = useStudy()
-  if (!map) return null
+  if (!map) {
+    return (
+      <div className="mx-auto max-w-5xl px-5 py-16">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <FileQuestion className="size-16 text-muted-foreground/40" />
+          <h3 className="mt-6 text-xl font-semibold">No hay mapa cargado</h3>
+          <p className="mt-2 max-w-sm text-muted-foreground">
+            Selecciona un itinerario o crea uno nuevo para ver tu progreso.
+          </p>
+          <Link
+            href="/upload"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.02]"
+          >
+            Subir apuntes
+          </Link>
+        </div>
+      </div>
+    )
+  }
   const stats = computeStats(map, progress)
   const circ = 2 * Math.PI * 60
 
