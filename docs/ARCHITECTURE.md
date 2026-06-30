@@ -5,29 +5,50 @@
 ```
 study-map-app/
 ├── app/                    # Next.js App Router
-│   ├── globals.css         # Tema, tokens Tailwind, estilos base
-│   ├── layout.tsx          # Root layout, fuentes, metadata, Analytics
-│   └── page.tsx            # Entry: StudyProvider + AppShell
+│   ├── (main)/             # Layout protegido (ErrorBoundary)
+│   │   ├── app/[mapId]/   # Vista de mapa individual
+│   │   ├── dashboard/     # Dashboard de progreso global
+│   │   └── layout.tsx     # Layout con ItineraryList
+│   ├── api/                # API routes
+│   │   ├── auth/[...all]/ # better-auth endpoints
+│   │   ├── delete-map/    # DELETE /api/delete-map
+│   │   ├── generate-map/  # POST /api/generate-map
+│   │   ├── list-maps/     # GET /api/list-maps
+│   │   ├── load-state/    # GET /api/load-state
+│   │   └── validate-answer/ # POST /api/validate-answer
+│   ├── upload/            # Página de subida
+│   ├── globals.css        # Tema, tokens Tailwind, estilos base
+│   ├── layout.tsx         # Root layout, fuentes, metadata, ThemeProvider
+│   └── page.tsx           # Entry: StudyProvider + AppShell
 ├── components/
-│   ├── ui/                 # Componentes shadcn (Button, …)
-│   ├── app-shell.tsx       # Shell y navegación principal
-│   ├── brand.tsx           # Logo, ThemeToggle
-│   ├── dashboard.tsx       # Vista de progreso
-│   ├── landing.tsx         # Landing page
-│   ├── node-drawer.tsx     # Panel lateral de concepto
-│   ├── node-field.tsx      # Fondo animado (canvas)
-│   ├── quiz-mode.tsx       # Modo test fullscreen
-│   ├── skill-tree.tsx      # Grafo / lista de nodos
-│   └── upload-screen.tsx   # Subida de apuntes
+│   ├── ui/                # Componentes shadcn (Button, …)
+│   ├── app-shell.tsx      # Shell y navegación principal
+│   ├── brand.tsx          # Logo, ThemeToggle
+│   ├── dashboard.tsx      # Vista de progreso
+│   ├── error-boundary.tsx # Error boundary global
+│   ├── landing.tsx        # Landing page
+│   ├── lesson-mode.tsx    # Modo lección fullscreen (choice + text + theory)
+│   ├── loading-skeleton.tsx # Esqueleto de carga
+│   ├── node-drawer.tsx    # Panel lateral de concepto
+│   ├── node-field.tsx     # Fondo animado (canvas)
+│   ├── skill-tree.tsx     # Grafo / lista de nodos
+│   └── upload-screen.tsx  # Subida de apuntes
 ├── lib/
-│   ├── store.tsx           # Context + estado global
-│   ├── study.ts            # Lógica de dominio
-│   ├── templates.ts        # Plantillas de asignaturas
-│   ├── types.ts            # Tipos TypeScript
-│   └── utils.ts            # cn() helper
-├── public/                 # Assets estáticos (iconos, placeholders)
-├── docs/                   # Esta documentación
-├── components.json         # Config shadcn
+│   ├── actions/           # Server Actions (generate-map, record-lesson, delete-map)
+│   ├── auth/              # better-auth config + plugins (anon, migration, rate-limit)
+│   ├── db/                # Drizzle ORM (conexión lazy, schema, migrations)
+│   ├── store.tsx          # Context + estado global + localStorage persist
+│   ├── study.ts           # Lógica de dominio (mastery, stats, layout, generación)
+│   ├── templates.ts       # Plantillas de asignaturas
+│   ├── types.ts           # Tipos TypeScript
+│   ├── utils.ts           # cn() helper
+│   ├── answer-check.ts    # Validación de respuestas de texto (word tokens)
+│   ├── lesson.ts          # Helpers de lección (step counting)
+│   └── migrate-lesson.ts  # Migración de preguntas legacy a steps
+├── public/                # Assets estáticos (iconos, placeholders)
+├── docs/                  # Esta documentación
+├── components.json        # Config shadcn
+├── eslint.config.mjs      # ESLint flat config + a11y plugin
 ├── next.config.mjs
 ├── package.json
 ├── postcss.config.mjs
@@ -175,15 +196,17 @@ Un nodo se desbloquea cuando **todos** sus prerrequisitos (`deps`) tienen master
 
 ## Plantillas — `lib/templates.ts`
 
-Tres asignaturas predefinidas:
+Cinco asignaturas predefinidas:
 
 | Key | Subject | Keywords ejemplo |
 |-----|---------|------------------|
 | `biologia` | Biología celular | celula, adn, mitocondria… |
 | `historia` | Revolución Industrial | historia, revoluc, industrial… |
 | `programacion` | Fundamentos de Programación | program, javascript, algoritmo… |
+| `matematicas` | Álgebra básica | algebra, ecuación, x, función… |
+| `fisica` | Mecánica clásica | fisic, fuerza, velocidad, newton… |
 
-Cada plantilla tiene 8–10 nodos en árbol con `level` y `deps`, y 3 preguntas por nodo.
+Cada plantilla tiene 7–9 nodos en árbol con `level` y `deps`, y 3 preguntas por nodo.
 
 **Para añadir una asignatura:** crear un `SubjectTemplate` y añadirlo al array `templates`.
 
@@ -210,7 +233,7 @@ Dentro de `app`, tabs locales en `AppShell`:
 │  Landing, SkillTree, Quiz, etc.     │
 ├─────────────────────────────────────┤
 │  Estado (lib/store.tsx)             │
-│  React Context, sin persistencia    │
+│  React Context + localStorage cada 30s │
 ├─────────────────────────────────────┤
 │  Dominio (lib/study.ts)             │
 │  Mastery, stats, layout, generación │
@@ -251,15 +274,43 @@ flowchart TD
 
 Variables de entorno: ver `.env.local.example` (`GOOGLE_GENERATIVE_AI_API_KEY`, `GEMINI_MODEL` opcional).
 
+## Autenticación — `lib/auth/index.ts`
+
+| Plugin | Estado | Detalle |
+|--------|--------|---------|
+| anonymous | ✅ | Usuarios sin registro, datos migrables al vincular |
+| emailAndPassword | 🔴 disabled | Podría activarse si se desea |
+| emailVerification | ✅ | Via Resend |
+| socialProviders (Google) | ✅ | Habilitado si GOOGLE_CLIENT_ID está definido |
+| magicLink | ✅ | Enlace mágico por email via Resend |
+
+## Base de datos — `lib/db/`
+
+- **Drizzle ORM** con PostgreSQL
+- Conexión lazy (`getDb()`), no falla al importar si falta DATABASE_URL
+- Proxy `db` para compatibilidad hacia atrás (lanza error en tiempo de uso)
+- Tablas: `user`, `session`, `account`, `verification`, `rateLimit`
+
+## API Routes
+
+| Endpoint | Método | Función |
+|----------|--------|---------|
+| `/api/auth/[...all]` | All | better-auth handler |
+| `/api/generate-map` | POST | Generar mapa desde texto/archivo |
+| `/api/delete-map` | DELETE | Eliminar mapa por ID |
+| `/api/list-maps` | GET | Listar mapas del usuario |
+| `/api/load-state` | GET | Cargar estado (con/sin mapId) |
+| `/api/validate-answer` | POST | Validación por IA de respuestas de texto |
+
+Los endpoints también tienen versiones Server Action en `lib/actions/` para uso client-side.
+
 ## Extensiones futuras
 
 | Feature | Dónde tocar |
 |---------|-------------|
 | DOCX | `lib/extract-text.ts` + mammoth |
-| Persistencia | localStorage en `store.tsx` o backend |
-| Auth | Nuevo provider + middleware |
 | Más asignaturas | `lib/templates.ts` |
-| Tests E2E | Nueva carpeta `tests/` o `e2e/` |
+| Tests | Nueva carpeta `tests/` o `e2e/` |
 
 ## Alias de imports
 

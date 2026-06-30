@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   description:
     'Transforma tus apuntes en un mapa interactivo de conocimiento. Avanza desbloqueando conceptos con tests y descubre exactamente qué dominas.',
   generator: 'v0.app',
+  manifest: '/manifest.json',
   icons: {
     icon: [
       {

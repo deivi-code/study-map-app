@@ -8,7 +8,8 @@ Documentación de referencia para agentes y desarrolladores que trabajen en este
 
 - Idioma de la UI: **español** (`lang="es"` en el layout)
 - Modo oscuro por defecto, con toggle claro/oscuro
-- Sin backend ni autenticación: todo el estado vive en memoria del cliente
+- Backend con better-auth + Drizzle ORM + PostgreSQL para cuentas, sesiones y persistencia
+- Los usuarios anónimos pueden usar la app sin registro; al vincular cuenta se migran datos
 - La generación de mapas es con IA (Gemini) con fallback a plantillas locales
 
 ## Índice de documentos
@@ -25,14 +26,14 @@ Documentación de referencia para agentes y desarrolladores que trabajen en este
 ```
 landing → upload → app (tree | dashboard)
                       ↓
-              NodeDrawer + QuizMode (overlays)
+              NodeDrawer + LessonMode (overlays)
 ```
 
 1. **landing**: página de marketing con hero, features y CTAs
 2. **upload**: formulario de subida + loader simulado
 3. **app**: vista principal con pestañas Mapa / Progreso
 4. **NodeDrawer**: panel lateral con detalle del concepto
-5. **QuizMode**: pantalla completa de test por nodo
+5. **LessonMode**: pantalla completa de test por nodo (choice + text + theory)
 
 ## Convenciones al editar
 
@@ -41,8 +42,9 @@ landing → upload → app (tree | dashboard)
 - Textos de UI en español
 - Animaciones con **Framer Motion**; respetar `prefers-reduced-motion` donde exista (p. ej. `NodeField`)
 - Estilos con **Tailwind CSS v4** y variables CSS de shadcn
-- No añadir backend ni persistencia salvo que se pida explícitamente
+- Excepciones en `catch` se devuelven como `{ error }` desde Server Actions, no se lanzan
 - Mantener la lógica de dominio en `lib/study.ts` y el estado global en `lib/store.tsx`
+- Lógica de autenticación en `lib/auth/`, esquemas DB en `lib/db/`
 
 ## Comandos
 
@@ -60,6 +62,12 @@ pnpm lint     # ESLint
 | `app/page.tsx` | Punto de entrada: `StudyProvider` + `AppShell` |
 | `lib/store.tsx` | Estado global (vistas, mapa, progreso, tema) |
 | `lib/study.ts` | Lógica: generación, mastery, layout, estadísticas |
-| `lib/templates.ts` | Plantillas de asignaturas (biología, historia, programación) |
+| `lib/templates.ts` | Plantillas de asignaturas (biología, historia, programación, mates, física) |
 | `lib/types.ts` | Tipos TypeScript del dominio |
+| `lib/db/index.ts` | Conexión a PostgreSQL con Drizzle ORM (lazy-init) |
+| `lib/auth/index.ts` | Configuración de better-auth (anon, email, Google, magic link) |
+| `lib/theme-context.tsx` | Toggle claro/oscuro con persistencia localStorage |
+| `lib/answer-check.ts` | Validación de respuestas de texto (tokens) |
+| `components/error-boundary.tsx` | Error boundary global con reintento |
+| `components/loading-skeleton.tsx` | Esqueleto de carga compartido entre vistas |
 | `app/globals.css` | Tokens de diseño y tema claro/oscuro |

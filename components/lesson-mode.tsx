@@ -2,7 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowRight, BookOpen, Check, Loader2, RotateCcw, Sparkles, X } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { checkTextAnswer } from "@/lib/answer-check"
 import { countAssessableSteps, isAssessableStep } from "@/lib/lesson"
 import { useStudy } from "@/lib/store"
@@ -12,7 +13,7 @@ import { masteryFromScore, masteryMeta } from "@/lib/study"
 import type { ChoiceStep, TextStep, TheoryStep } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-export function LessonMode({ onClose: externalClose }: { onClose?: () => void } = {}) {
+export function LessonMode({ onClose: externalClose, mapId }: { onClose?: () => void; mapId?: string }) {
   const { map, lessonNodeId, endLesson } = useStudy()
   const node = map?.nodes.find((n) => n.id === lessonNodeId) ?? null
   const handleClose = externalClose ?? endLesson
@@ -26,14 +27,50 @@ export function LessonMode({ onClose: externalClose }: { onClose?: () => void } 
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[60] flex flex-col bg-background"
         >
-          <LessonRunner key={node.id} nodeId={node.id} onClose={handleClose} />
+          <LessonRunner key={node.id} nodeId={node.id} onClose={handleClose} mapId={mapId ?? map?.id} />
         </motion.div>
       )}
     </AnimatePresence>
   )
 }
 
-function LessonRunner({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
+function ConfirmDialog({ onConfirm, onCancel, mapId }: { onConfirm: () => void; onCancel: () => void; mapId?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-background/80 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl"
+      >
+        <h3 className="text-lg font-semibold">¿Salir de la lección?</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Se perderá el progreso de este nodo. Puedes volver a intentarlo después.
+        </p>
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
+          >
+            Continuar
+          </button>
+          <Link
+            href={`/app/${mapId}`}
+            onClick={onConfirm}
+            className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:opacity-90"
+          >
+            Salir
+          </Link>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+function LessonRunner({ nodeId, onClose, mapId }: { nodeId: string; onClose: () => void; mapId?: string }) {
   const { map, recordLesson, closeNode } = useStudy()
   const node = map!.nodes.find((n) => n.id === nodeId)!
   const steps = node.steps
@@ -43,6 +80,7 @@ function LessonRunner({ nodeId, onClose }: { nodeId: string; onClose: () => void
   const [index, setIndex] = useState(0)
   const [correctCount, setCorrectCount] = useState(0)
   const [finished, setFinished] = useState(false)
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
   const persistedRef = useRef(false)
 
   const step = steps[index]
@@ -61,93 +99,122 @@ function LessonRunner({ nodeId, onClose }: { nodeId: string; onClose: () => void
     }
   }
 
+  function handleExit() {
+    if (!finished && !showExitConfirm) {
+      setShowExitConfirm(true)
+    } else {
+      onClose()
+    }
+  }
+
+  function handleRetry() {
+    setIndex(0)
+    setCorrectCount(0)
+    setFinished(false)
+    persistedRef.current = false
+  }
+
   useEffect(() => {
     if (finished && !persistedRef.current) {
       persistedRef.current = true
       recordLesson(nodeId, score)
       recordLessonAction(map!.id, nodeId, score)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished])
+  }, [finished, nodeId, score, map, recordLesson])
 
   if (finished) {
     return (
-      <Results
-        node={node}
-        score={score}
-        correct={correctCount}
-        total={assessableTotal}
-        onClose={onClose}
-        onRetry={() => {
-          setIndex(0)
-          setCorrectCount(0)
-          setFinished(false)
-        }}
-        closeNode={closeNode}
-      />
+      <>
+        <Results
+          node={node}
+          score={score}
+          correct={correctCount}
+          total={assessableTotal}
+          onClose={onClose}
+          onRetry={handleRetry}
+          closeNode={closeNode}
+          mapId={mapId}
+        />
+      </>
     )
   }
 
   const progressPct = ((index + 1) / total) * 100
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5">
-      <header className="flex items-center gap-4 py-6">
-        <button
-          onClick={onClose}
-          aria-label="Salir de la lección"
-          className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-        >
-          <X className="size-5" />
-        </button>
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+    <>
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5">
+        <header className="flex items-center gap-4 py-6">
+          <button
+            onClick={handleExit}
+            aria-label="Salir de la lección"
+            className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <X className="size-5" />
+          </button>
+          <div
+            className="h-2 flex-1 overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-valuenow={Math.round(progressPct)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progreso de la lección"
+          >
+            <motion.div
+              className="h-full rounded-full bg-primary"
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.4 }}
+            />
+          </div>
+          <span className="text-sm tabular-nums text-muted-foreground">
+            Paso {index + 1}/{total}
+          </span>
+        </header>
+
+        <AnimatePresence mode="wait">
           <motion.div
-            className="h-full rounded-full bg-primary"
-            animate={{ width: `${progressPct}%` }}
-            transition={{ duration: 0.4 }}
-          />
-        </div>
-        <span className="text-sm tabular-nums text-muted-foreground">
-          Paso {index + 1}/{total}
-        </span>
-      </header>
+            key={`${index}-${step.id}`}
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.35 }}
+            className="flex flex-1 flex-col"
+          >
+            <p className="text-xs font-medium uppercase tracking-wider text-primary">{node.title}</p>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${index}-${step.id}`}
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -40 }}
-          transition={{ duration: 0.35 }}
-          className="flex flex-1 flex-col"
-        >
-          <p className="text-xs font-medium uppercase tracking-wider text-primary">{node.title}</p>
-
-          {step.type === "theory" && (
-            <TheoryStepView step={step} onContinue={next} />
-          )}
-          {step.type === "choice" && (
-            <ChoiceStepView
-              step={step}
-              onAnswered={(correct) => {
-                if (correct) onStepCorrect()
-              }}
-              onNext={next}
-            />
-          )}
-          {step.type === "text" && (
-            <TextStepView
-              step={step}
-              context={node.detail}
-              onAnswered={(correct) => {
-                if (correct) onStepCorrect()
-              }}
-              onNext={next}
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
-    </div>
+            {step.type === "theory" && (
+              <TheoryStepView step={step} onContinue={next} />
+            )}
+            {step.type === "choice" && (
+              <ChoiceStepView
+                step={step}
+                onAnswered={(correct) => {
+                  if (correct) onStepCorrect()
+                }}
+                onNext={next}
+              />
+            )}
+            {step.type === "text" && (
+              <TextStepView
+                step={step}
+                context={node.detail}
+                onAnswered={(correct) => {
+                  if (correct) onStepCorrect()
+                }}
+                onNext={next}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      {showExitConfirm && (
+        <ConfirmDialog
+          onConfirm={onClose}
+          onCancel={() => setShowExitConfirm(false)}
+          mapId={mapId}
+        />
+      )}
+    </>
   )
 }
 
@@ -196,6 +263,7 @@ function ChoiceStepView({
     if (!correct) {
       setShake(true)
       setTimeout(() => setShake(false), 420)
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(20)
     }
   }
 
@@ -215,6 +283,7 @@ function ChoiceStepView({
                 type="button"
                 onClick={() => choose(i)}
                 whileTap={answered ? {} : { scale: 0.99 }}
+                aria-pressed={selected === i}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-xl border p-4 text-left text-sm font-medium transition-colors",
                   state === "idle" && "border-border bg-card/60 hover:border-primary/50",
@@ -295,7 +364,7 @@ function TextStepView({
   const [input, setInput] = useState("")
   const [answered, setAnswered] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
-  const [aiReviewed, setAiReviewed] = useState(false)
+  const [aiFeedback, setAiFeedback] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
@@ -310,11 +379,12 @@ function TextStepView({
       setFeedback(step.explanation)
       setShake(true)
       setTimeout(() => setShake(false), 420)
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(20)
     }
   }
 
   async function requestAiReview() {
-    if (aiReviewed || aiLoading || isCorrect) return
+    if (aiLoading || isCorrect) return
     setAiLoading(true)
     try {
       const data = await validateAnswerAction({
@@ -324,8 +394,7 @@ function TextStepView({
         acceptedAnswers: step.acceptedAnswers,
         context,
       })
-      setAiReviewed(true)
-      setFeedback(data.feedback)
+      setAiFeedback(data.feedback)
       if (data.correct) {
         setIsCorrect(true)
         onAnswered(true)
@@ -344,7 +413,9 @@ function TextStepView({
         <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
           <span className="font-medium text-foreground/80">Pista:</span> {step.hint}
         </p>
+        <label htmlFor="lesson-text-answer" className="sr-only">Escribe tu respuesta</label>
         <input
+          id="lesson-text-answer"
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -380,14 +451,13 @@ function TextStepView({
               >
                 {isCorrect ? "¡Correcto! " : "Incorrecto. "}
               </span>
-              {feedback ?? step.explanation}
+              {(aiFeedback ?? feedback) || step.explanation}
             </motion.div>
           )}
         </AnimatePresence>
-        {answered && !isCorrect && !aiReviewed && (
+        {answered && !isCorrect && !aiFeedback && !aiLoading && (
           <button
             onClick={requestAiReview}
-            disabled={aiLoading}
             className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/5 px-6 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
           >
             {aiLoading ? (
@@ -396,6 +466,14 @@ function TextStepView({
               <Sparkles className="size-4" />
             )}
             Pedir revisión con IA
+          </button>
+        )}
+        {answered && !isCorrect && aiFeedback && !aiLoading && (
+          <button
+            onClick={() => { setAnswered(false); setAiFeedback(null); setFeedback(null) }}
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 text-sm font-medium transition-colors hover:bg-accent"
+          >
+            Reintentar respuesta
           </button>
         )}
       </motion.div>
@@ -421,6 +499,7 @@ function Results({
   onClose,
   onRetry,
   closeNode,
+  mapId,
 }: {
   node: { title: string }
   score: number
@@ -429,6 +508,7 @@ function Results({
   onClose: () => void
   onRetry: () => void
   closeNode: () => void
+  mapId?: string
 }) {
   const mastery = masteryFromScore(score)
   const meta = masteryMeta[mastery]
@@ -468,7 +548,7 @@ function Results({
             {score}%
           </motion.span>
           <span className="text-xs text-muted-foreground">
-            {correct}/{total} aciertos
+            {total > 0 ? `${correct}/${total} aciertos` : "Lección sin preguntas"}
           </span>
         </div>
       </div>
@@ -485,15 +565,12 @@ function Results({
       <p className="mt-2 text-muted-foreground">{meta.coach}</p>
 
       <div className="mt-8 flex w-full flex-col gap-3">
-        <button
-          onClick={() => {
-            onClose()
-            closeNode()
-          }}
+        <Link
+          href={`/app/${mapId}`}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01]"
         >
           Volver al mapa
-        </button>
+        </Link>
         <button
           onClick={onRetry}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3.5 text-sm font-medium transition-colors hover:bg-accent"
@@ -507,4 +584,3 @@ function Results({
 }
 
 /** @deprecated Use LessonMode */
-export const QuizMode = LessonMode

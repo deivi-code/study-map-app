@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useActionState } from "react"
 import { useFormStatus } from "react-dom"
 import { ArrowLeft, FileText, Loader2, Sparkles, Upload, X } from "lucide-react"
 import { generateMapAction } from "@/lib/actions/generate-map"
@@ -25,14 +25,13 @@ export default function UploadPage() {
   const [text, setText] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [state, formAction] = useActionState(generateMapAction, {})
   const inputRef = useRef<HTMLInputElement>(null)
 
   const canGenerate = text.trim().length > 8 || !!file
 
   function handleFile(selected: File | undefined) {
     if (!selected) return
-    setError(null)
     setFile(selected)
   }
 
@@ -56,7 +55,7 @@ export default function UploadPage() {
           Arrastra un PDF o pega tu texto. Construiremos tu mapa de conocimiento.
         </p>
 
-        <form action={generateMapAction}>
+        <form action={formAction}>
           <div
             onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
@@ -118,14 +117,14 @@ export default function UploadPage() {
           <textarea
             name="text"
             value={text}
-            onChange={(e) => { setError(null); setText(e.target.value) }}
+            onChange={(e) => { setText(e.target.value) }}
             placeholder="Pega aquí tus apuntes de biología, historia, programación…"
             className="min-h-40 w-full resize-y rounded-2xl border border-border bg-card/40 p-4 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60"
           />
 
-          {error && (
+          {state?.error && (
             <p className="mt-4 rounded-xl border border-mastery-red/40 bg-mastery-red/10 px-4 py-3 text-sm text-mastery-red">
-              {error}
+              {state.error}
             </p>
           )}
 

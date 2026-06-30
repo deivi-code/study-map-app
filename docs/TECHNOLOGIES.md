@@ -22,9 +22,26 @@
 | **lucide-react** | Iconografía |
 | **framer-motion** | Animaciones de entrada/salida, transiciones, microinteracciones |
 
+## Base de datos y autenticación
+
+| Paquete | Uso |
+|---------|-----|
+| **drizzle-orm** + **drizzle-kit** | ORM para PostgreSQL |
+| **postgres** | Driver de PostgreSQL |
+| **better-auth** | Autenticación (anon, email, Google, magic link) |
+| **resend** | Envío de emails (verificación, magic link) |
+| **pg** / **@types/pg** | Tipos PostgreSQL |
+
 ## Analytics
 
 - **@vercel/analytics**: solo en producción (`NODE_ENV === 'production'`) en `app/layout.tsx`
+
+## Linting
+
+| Paquete | Uso |
+|---------|-----|
+| **eslint** (10.x) | Linter con flat config |
+| **eslint-plugin-jsx-a11y** | Reglas de accesibilidad |
 
 ## Configuración relevante
 
@@ -54,8 +71,14 @@
 
 ### `next.config.mjs`
 
-- `typescript.ignoreBuildErrors: true` — el build no falla por errores TS
 - `images.unoptimized: true` — imágenes sin optimización de Next
+- `typescript.ignoreBuildErrors` NO está activado; el build valida TypeScript
+
+### `eslint.config.mjs`
+
+- ESLint flat config
+- `eslint-plugin-jsx-a11y` para reglas de accesibilidad (nivel warn)
+- Ignora `.next/`, `out/`, `dist/`, `build/`
 
 ### PostCSS
 
@@ -94,9 +117,6 @@ import { Button } from "@/components/ui/button"
 
 ## Lo que NO usa el proyecto
 
-- Base de datos
-- API routes / Server Actions para datos
-- Autenticación
 - Librerías de gráficos (charts son SVG manual)
 - React Query, Zustand, Redux (estado con React Context)
 - Tests automatizados (no hay suite configurada)

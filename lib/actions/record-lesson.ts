@@ -19,7 +19,6 @@ export async function recordLessonAction(
     const userId = session.user.id
     const mastery = masteryFromScore(score)
 
-    // Upsert progress
     const existing = await db
       .select()
       .from(nodeProgress)
@@ -48,13 +47,29 @@ export async function recordLessonAction(
       })
     }
 
-    // Update streak
     const today = new Date().toISOString().slice(0, 10)
     const [stats] = await db.select().from(userStats).where(eq(userStats.userId, userId))
     if (stats) {
+      const lastActive = stats.lastActiveDate ? new Date(stats.lastActiveDate) : null
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+      const yesterdayStr = yesterday.toISOString().slice(0, 10)
+
+      let newStreak: number
+      if (lastActive && today > lastActive.toISOString().slice(0, 10)) {
+        const lastActiveStr = lastActive.toISOString().slice(0, 10)
+        if (lastActiveStr === yesterdayStr) {
+          newStreak = stats.streak + 1
+        } else {
+          newStreak = 1
+        }
+      } else {
+        newStreak = stats.streak
+      }
+
       await db
         .update(userStats)
-        .set({ streak: stats.streak + 1, lastActiveDate: today })
+        .set({ streak: newStreak, lastActiveDate: today })
         .where(eq(userStats.userId, userId))
     } else {
       await db.insert(userStats).values({ userId, streak: 1, lastActiveDate: today })
