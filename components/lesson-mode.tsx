@@ -259,6 +259,7 @@ function ChoiceStepView({
     if (!correct) {
       setShake(true)
       setTimeout(() => setShake(false), 420)
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(20)
     }
   }
 
@@ -374,6 +375,7 @@ function TextStepView({
       setFeedback(step.explanation)
       setShake(true)
       setTimeout(() => setShake(false), 420)
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(20)
     }
   }
 
