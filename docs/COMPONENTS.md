@@ -3,16 +3,18 @@
 ## Árbol de composición
 
 ```
-Page
-└── StudyProvider (lib/store.tsx)
-    └── AppShell
-        ├── Landing          (view === "landing")
-        ├── UploadScreen     (view === "upload")
-        └── App layout       (view === "app")
-            ├── Header (Logo, Nav, ThemeToggle)
-            ├── SkillTree | Dashboard  (tab)
-            ├── NodeDrawer   (overlay, si activeNodeId)
-            └── LessonMode     (overlay, si lessonNodeId)
+Page (Server Component)
+└── ThemeProvider (lib/theme-context.tsx)
+    └── StudyProvider (lib/store.tsx)
+        ├── Analytics (Vercel)
+        └── AppShell
+            ├── Landing          (view === "landing")
+            ├── UploadScreen     (view === "upload")
+            └── App layout       (view === "app")
+                ├── Header (Logo, Nav, ThemeToggle)
+                ├── SkillTree | Dashboard  (tab)
+                ├── NodeDrawer   (overlay, si activeNodeId)
+                └── LessonMode   (overlay, si lessonNodeId)
 ```
 
 ## Componentes de aplicación
@@ -141,11 +143,7 @@ Migración legacy en `lib/migrate-lesson.ts` (`questionsToSteps`, enriquecimient
 
 ---
 
-### ~~`QuizMode`~~ (eliminado)
 
-Reemplazado por `LessonMode`.
-
----
 
 ### `Dashboard` — `components/dashboard.tsx`
 
@@ -163,6 +161,24 @@ Panel de progreso y estadísticas.
 Subcomponente: `StatCard`.
 
 **Datos:** `computeStats()`, `getMastery()`, `masteryMeta` de `lib/study.ts`.
+
+---
+
+### `ErrorBoundary` — `components/error-boundary.tsx`
+
+Error boundary global que envuelve `(main)/layout`.
+
+- Muestra mensaje de error y botón "Reintentar"
+- Captura errores no controlados de componentes hijo
+
+---
+
+### `LoadingSkeleton` — `components/loading-skeleton.tsx`
+
+Esqueleto de carga compartido para vistas que cargan datos.
+
+- Usado por `app/(main)/app/[mapId]/loading.tsx` y `SkillTree`
+- Muestra placeholders animados de círculos y líneas
 
 ---
 
@@ -234,8 +250,10 @@ Envuelve la app en `app/page.tsx`.
 | `openNode` / `closeNode` | fn | Controlar drawer |
 | `lessonNodeId` | `string \| null` | Nodo en modo lección |
 | `startLesson` / `endLesson` | fn | Controlar lección |
-| `theme` | `"dark" \| "light"` | Tema actual |
+| `theme` | `"dark" \| "light"` | Tema actual (persistido en localStorage) |
 | `toggleTheme` | fn | Alternar tema |
+| `hasUnsavedChanges` | `boolean` | Indica si hay cambios sin persistir |
+| `saveState` | fn | Forzar persistencia inmediata a localStorage |
 
 ---
 

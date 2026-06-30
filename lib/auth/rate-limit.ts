@@ -1,4 +1,3 @@
-import { db } from "@/lib/db"
 import { rateLimit } from "@/lib/db/schema"
 
 const WINDOW_MS = 3 * 60 * 60 * 1000 // 3 hours

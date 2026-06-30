@@ -581,4 +581,3 @@ function Results({
 }
 
 /** @deprecated Use LessonMode */
-export const QuizMode = LessonMode
