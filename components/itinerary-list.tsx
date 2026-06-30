@@ -100,7 +100,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 320, damping: 34 }}
-        className="relative z-10 flex w-full max-w-md flex-col border-l border-border bg-card shadow-2xl"
+        className="relative z-10 flex h-dvh w-full max-w-md flex-col border-l border-border bg-card shadow-2xl"
       >
         {/* Header */}
         <header className="flex items-center justify-between border-b border-border p-6">
@@ -110,7 +110,15 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
             </div>
             <div>
               <h2 className="text-lg font-semibold tracking-tight">Mis itinerarios</h2>
-              <p className="text-xs text-muted-foreground">{maps.length} mapa{maps.length !== 1 ? "s" : ""} guardado{maps.length !== 1 ? "s" : ""}</p>
+              {isLoading ? (
+                <div className="mt-1 flex items-center gap-1.5">
+                  <div className="h-3 w-24 animate-pulse rounded-md bg-muted-foreground/15" />
+                  <div className="h-3 w-3 animate-pulse rounded-md bg-muted-foreground/15" />
+                  <div className="h-3 w-14 animate-pulse rounded-md bg-muted-foreground/15" />
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">{maps.length} mapa{maps.length !== 1 ? "s" : ""} guardado{maps.length !== 1 ? "s" : ""}</p>
+              )}
             </div>
           </div>
           <button
