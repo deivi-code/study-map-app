@@ -2,8 +2,6 @@ import { templates } from "./templates"
 import { legacyNodesToKnowledgeNodes } from "./migrate-lesson"
 import type { KnowledgeNode, Mastery, ProgressMap, StudyMap } from "./types"
 
-let counter = 0
-
 /** Picks a subject template from the user input and builds a study map. */
 export function generateStudyMap(input: { text: string; source: string }): StudyMap {
   const haystack = `${input.text} ${input.source}`.toLowerCase()
@@ -18,10 +16,10 @@ export function generateStudyMap(input: { text: string; source: string }): Study
     }
   }
 
-  // If nothing matched, rotate through templates so repeated uploads vary.
+  // If nothing matched, rotate through templates using a seed based on input.
   if (bestScore <= 0) {
-    best = templates[counter % templates.length]
-    counter++
+    const seed = [...haystack].reduce((acc, c) => acc + c.charCodeAt(0), 0)
+    best = templates[seed % templates.length]
   }
 
   return {
@@ -81,6 +79,10 @@ export function computeStats(map: StudyMap, progress: ProgressMap): MapStats {
   let locked = 0
   let scoreSum = 0
   const weak: KnowledgeNode[] = []
+
+  if (map.nodes.length === 0) {
+    return { total: 0, green: 0, amber: 0, red: 0, locked: 0, overall: 0, weak: [] }
+  }
 
   for (const node of map.nodes) {
     const m = getMastery(node.id, node, progress)
