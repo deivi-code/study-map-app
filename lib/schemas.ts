@@ -46,7 +46,7 @@ export const knowledgeNodeSchema = z.object({
 /** Schema for LLM structured output (without map metadata). */
 export const llmStudyMapSchema = z.object({
   subject: z.string().min(2),
-  nodes: z.array(knowledgeNodeSchema).min(5).max(12),
+  nodes: z.array(knowledgeNodeSchema).min(3).max(12),
 })
 
 export type LlmStudyMap = z.infer<typeof llmStudyMapSchema>
