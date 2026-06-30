@@ -1,9 +1,11 @@
 "use client"
 
-import { Moon, Sun, User, LogOut, LogIn } from "lucide-react"
+import { Moon, Sun, User, LogOut, LogIn, Map } from "lucide-react"
 import { useStudy } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
+import { ItineraryList } from "./itinerary-list"
+import { AnimatePresence } from "framer-motion"
 
 export function Logo({ className }: { className?: string }) {
   return (
@@ -46,6 +48,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 export function AuthButton({ className }: { className?: string }) {
   const { user, isLoadingUser, signInWithGoogle, signOut } = useStudy()
   const [showMenu, setShowMenu] = useState(false)
+  const [showItineraryList, setShowItineraryList] = useState(false)
 
   if (isLoadingUser) {
     return (
@@ -53,47 +56,80 @@ export function AuthButton({ className }: { className?: string }) {
     )
   }
 
-  if (user && !user.isAnonymous) {
-    return (
-      <div className="relative">
-        <button
-          onClick={() => setShowMenu(!showMenu)}
-          className={cn(
-            "flex items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent",
-            className,
-          )}
-        >
-          <User className="h-4 w-4" />
-          <span className="hidden sm:inline">{user.name || "Usuario"}</span>
-        </button>
-        {showMenu && (
-          <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-card p-2 shadow-lg">
-            <button
-              onClick={() => {
-                signOut()
-                setShowMenu(false)
-              }}
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
-            >
-              <LogOut className="h-4 w-4" />
-              Cerrar sesión
-            </button>
-          </div>
-        )}
-      </div>
-    )
-  }
+  const isAuthenticated = user && !user.isAnonymous
 
   return (
-    <button
-      onClick={signInWithGoogle}
-      className={cn(
-        "flex items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent",
-        className,
-      )}
-    >
-      <LogIn className="h-4 w-4" />
-      <span className="hidden sm:inline">Iniciar sesión</span>
-    </button>
+    <>
+      <div className="relative flex items-center gap-2">
+        {isAuthenticated ? (
+          <>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className={cn(
+                "flex items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent",
+                className,
+              )}
+            >
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">{user.name || "Usuario"}</span>
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-card p-2 shadow-lg">
+                <button
+                  onClick={() => {
+                    setShowMenu(false)
+                    setShowItineraryList(true)
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+                >
+                  <Map className="h-4 w-4" />
+                  Mis itinerarios
+                </button>
+                <div className="my-1 border-t border-border" />
+                <button
+                  onClick={() => {
+                    signOut()
+                    setShowMenu(false)
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => setShowItineraryList(true)}
+              className={cn(
+                "flex items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent",
+                className,
+              )}
+            >
+              <Map className="h-4 w-4" />
+              <span className="hidden sm:inline">Mis itinerarios</span>
+            </button>
+            <button
+              onClick={signInWithGoogle}
+              className={cn(
+                "flex items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent",
+                className,
+              )}
+            >
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">Iniciar sesión</span>
+            </button>
+          </>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {showItineraryList && (
+          <ItineraryList onClose={() => setShowItineraryList(false)} />
+        )}
+      </AnimatePresence>
+    </>
   )
 }

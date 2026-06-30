@@ -38,6 +38,20 @@ components/app-shell.tsx → Navegación entre vistas
 components/skill-tree.tsx → Grafo principal
 ```
 
+## APIs disponibles
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/list-maps` | GET | Lista todos los mapas del usuario actual |
+| `/api/delete-map` | DELETE | Elimina un mapa por ID (`?mapId=xxx`) |
+| `/api/load-state` | GET | Carga estado; acepta `?mapId=xxx` para mapa específico |
+
+## Componentes de lista de itinerarios
+
+```
+components/itinerary-list.tsx → Panel lateral con lista de mapas guardados
+```
+
 ## Comandos
 
 ```bash

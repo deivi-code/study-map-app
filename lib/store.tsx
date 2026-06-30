@@ -39,6 +39,7 @@ interface StudyState {
   generateError: string | null
   clearGenerateError: () => void
   reset: () => void
+  loadMapById: (mapId: string) => Promise<void>
 
   progress: ProgressMap
   recordLesson: (nodeId: string, score: number) => void
@@ -221,6 +222,27 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setView("landing")
   }
 
+  const loadMapById = async (mapId: string) => {
+    try {
+      const res = await fetch(`/api/load-state?mapId=${mapId}`)
+      if (!res.ok) throw new Error("Error al cargar el mapa")
+      const data = (await res.json()) as {
+        map?: StudyMap | null
+        progress?: ProgressMap
+      }
+      if (data.map) {
+        setMap(data.map)
+        setProgress(data.progress ?? {})
+        setActiveNodeId(null)
+        setLessonNodeId(null)
+        setView("app")
+      }
+    } catch (err) {
+      console.error("Failed to load map by ID:", err)
+      throw err
+    }
+  }
+
   const recordLesson = (nodeId: string, score: number) => {
     setProgress((prev) => {
       const existing = prev[nodeId]
@@ -295,6 +317,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     generateError,
     clearGenerateError: () => setGenerateError(null),
     reset,
+    loadMapById,
     progress,
     recordLesson,
     streak,
