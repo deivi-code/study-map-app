@@ -13,20 +13,37 @@ const NODE = 76
 
 export function SkillTree() {
   const { map, progress, openNode } = useStudy()
+  const [search, setSearch] = useState("")
   const { positioned, width, height } = useMemo(
     () => layoutNodes(map?.nodes ?? []),
     [map],
   )
 
+  const filtered = useMemo(() => {
+    if (!search.trim()) return positioned
+    const q = search.toLowerCase()
+    return positioned.filter((n) => n.title.toLowerCase().includes(q))
+  }, [positioned, search])
+
   if (!map || !positioned.length) return <LoadingSkeleton />
 
   return (
     <>
+      <div className="relative">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar concepto..."
+          className="mx-auto mb-2 mt-4 block w-[90%] max-w-sm rounded-lg border border-border bg-card/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 lg:hidden"
+          aria-label="Buscar concepto"
+        />
+      </div>
       <div className="hidden lg:block">
-        <GraphView positioned={positioned} width={width} height={height} progress={progress} onOpen={openNode} />
+        <GraphView positioned={filtered} width={width} height={height} progress={progress} onOpen={openNode} />
       </div>
       <div className="lg:hidden">
-        <ListView positioned={positioned} progress={progress} map={map} onOpen={openNode} />
+        <ListView positioned={filtered} progress={progress} map={map} onOpen={openNode} />
       </div>
     </>
   )
@@ -45,6 +62,10 @@ function GraphView({
   progress: ProgressMap
   onOpen: (id: string) => void
 }) {
+  const parentMap = new Map<string, PositionedNode>()
+  for (const n of positioned) {
+    parentMap.set(n.id, n)
+  }
   const containerRef = useRef<HTMLDivElement>(null)
   const [t, setT] = useState({ x: 0, y: 0, s: 0.85 })
   const drag = useRef<{ active: boolean; sx: number; sy: number; ox: number; oy: number }>({
@@ -81,11 +102,6 @@ function GraphView({
     c.addEventListener("wheel", onWheel, { passive: false })
     return () => c.removeEventListener("wheel", onWheel)
   }, [])
-
-  const parentMap = new Map<string, PositionedNode>()
-  for (const n of positioned) {
-    parentMap.set(n.id, n)
-  }
 
   return (
     <div

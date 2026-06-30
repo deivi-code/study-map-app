@@ -1,6 +1,7 @@
 "use client"
 
 import { Map, ChartBar as BarChart3, Plus } from "lucide-react"
+import { ExportImport } from "@/components/export-import"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -84,6 +85,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Nuevo mapa</span>
               </Link>
+              <ExportImport />
               <AuthButton />
               <ThemeToggle />
             </div>

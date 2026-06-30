@@ -32,7 +32,7 @@ interface StudyState {
   clearGenerateError: () => void
 }
 
-const StudyContext = createContext<StudyState | null>(null)
+export const StudyContext = createContext<StudyState | null>(null)
 
 const STORAGE_KEY = "studymap:state"
 
