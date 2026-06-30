@@ -1,7 +1,9 @@
 "use client"
 
 import { Moon, Sun, User, LogOut, LogIn, Map } from "lucide-react"
-import { useStudy } from "@/lib/store"
+import { useAuth } from "@/lib/auth-context"
+import { useTheme } from "@/lib/theme-context"
+import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { ItineraryList } from "./itinerary-list"
@@ -29,7 +31,7 @@ export function Logo({ className }: { className?: string }) {
 }
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const { theme, toggleTheme } = useStudy()
+  const { theme, toggleTheme } = useTheme()
   return (
     <button
       type="button"
@@ -46,7 +48,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 }
 
 export function AuthButton({ className }: { className?: string }) {
-  const { user, isLoadingUser, signInWithGoogle, signOut } = useStudy()
+  const { user, isLoadingUser } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
   const [showItineraryList, setShowItineraryList] = useState(false)
 
@@ -57,6 +59,15 @@ export function AuthButton({ className }: { className?: string }) {
   }
 
   const isAuthenticated = user && !user.isAnonymous
+
+  async function handleSignOut() {
+    await authClient.signOut()
+    const result = await authClient.signIn.anonymous()
+    if (result.data?.user) {
+      localStorage.setItem("studymap:anonymousId", result.data.user.id)
+    }
+    window.location.href = "/"
+  }
 
   return (
     <>
@@ -88,7 +99,7 @@ export function AuthButton({ className }: { className?: string }) {
                 <div className="my-1 border-t border-border" />
                 <button
                   onClick={() => {
-                    signOut()
+                    handleSignOut()
                     setShowMenu(false)
                   }}
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
@@ -112,7 +123,7 @@ export function AuthButton({ className }: { className?: string }) {
               <span className="hidden sm:inline">Mis itinerarios</span>
             </button>
             <button
-              onClick={signInWithGoogle}
+              onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
               className={cn(
                 "flex items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent",
                 className,

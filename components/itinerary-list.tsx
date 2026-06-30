@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Map, Calendar, Layers, Trash2, ChevronRight, Loader2, AlertCircle, FileQuestion } from "lucide-react"
-import { useStudy } from "@/lib/store"
+import { useAuth } from "@/lib/auth-context"
+import { deleteMapAction } from "@/lib/actions/delete-map"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 interface MapMeta {
   id: string
@@ -20,7 +22,8 @@ interface ItineraryListProps {
 }
 
 export function ItineraryList({ onClose }: ItineraryListProps) {
-  const { user, loadMapById } = useStudy()
+  const { user } = useAuth()
+  const router = useRouter()
   const [maps, setMaps] = useState<MapMeta[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -47,16 +50,10 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
     fetchMaps()
   }, [fetchMaps])
 
-  const handleSelectMap = async (mapId: string) => {
-    try {
-      setLoadingId(mapId)
-      await loadMapById(mapId)
-      onClose()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar el mapa")
-    } finally {
-      setLoadingId(null)
-    }
+  const handleSelectMap = (mapId: string) => {
+    setLoadingId(mapId)
+    router.push(`/app/${mapId}`)
+    onClose()
   }
 
   const handleDeleteMap = async (mapId: string, e: React.MouseEvent) => {
@@ -65,8 +62,8 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
     
     try {
       setDeletingId(mapId)
-      const res = await fetch(`/api/delete-map?mapId=${mapId}`, { method: "DELETE" })
-      if (!res.ok) throw new Error("Error al eliminar")
+      const result = await deleteMapAction(mapId)
+      if (!result.success) throw new Error(result.error ?? "Error al eliminar")
       setMaps((prev) => prev.filter((m) => m.id !== mapId))
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al eliminar el mapa")

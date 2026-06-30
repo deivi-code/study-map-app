@@ -2,17 +2,20 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowRight, BookOpen, Check, Loader2, RotateCcw, Sparkles, X } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { checkTextAnswer } from "@/lib/answer-check"
 import { countAssessableSteps, isAssessableStep } from "@/lib/lesson"
 import { useStudy } from "@/lib/store"
+import { recordLessonAction } from "@/lib/actions/record-lesson"
+import { validateAnswerAction } from "@/lib/actions/validate-answer"
 import { masteryFromScore, masteryMeta } from "@/lib/study"
 import type { ChoiceStep, TextStep, TheoryStep } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-export function LessonMode() {
+export function LessonMode({ onClose: externalClose }: { onClose?: () => void } = {}) {
   const { map, lessonNodeId, endLesson } = useStudy()
   const node = map?.nodes.find((n) => n.id === lessonNodeId) ?? null
+  const handleClose = externalClose ?? endLesson
 
   return (
     <AnimatePresence>
@@ -23,7 +26,7 @@ export function LessonMode() {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[60] flex flex-col bg-background"
         >
-          <LessonRunner key={node.id} nodeId={node.id} onClose={endLesson} />
+          <LessonRunner key={node.id} nodeId={node.id} onClose={handleClose} />
         </motion.div>
       )}
     </AnimatePresence>
@@ -40,6 +43,7 @@ function LessonRunner({ nodeId, onClose }: { nodeId: string; onClose: () => void
   const [index, setIndex] = useState(0)
   const [correctCount, setCorrectCount] = useState(0)
   const [finished, setFinished] = useState(false)
+  const persistedRef = useRef(false)
 
   const step = steps[index]
   const score =
@@ -58,7 +62,11 @@ function LessonRunner({ nodeId, onClose }: { nodeId: string; onClose: () => void
   }
 
   useEffect(() => {
-    if (finished) recordLesson(nodeId, score)
+    if (finished && !persistedRef.current) {
+      persistedRef.current = true
+      recordLesson(nodeId, score)
+      recordLessonAction(map!.id, nodeId, score)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished])
 
@@ -309,18 +317,13 @@ function TextStepView({
     if (aiReviewed || aiLoading || isCorrect) return
     setAiLoading(true)
     try {
-      const res = await fetch("/api/validate-answer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: step.question,
-          hint: step.hint,
-          userAnswer: input,
-          acceptedAnswers: step.acceptedAnswers,
-          context,
-        }),
+      const data = await validateAnswerAction({
+        question: step.question,
+        hint: step.hint,
+        userAnswer: input,
+        acceptedAnswers: step.acceptedAnswers,
+        context,
       })
-      const data = (await res.json()) as { correct: boolean; feedback: string }
       setAiReviewed(true)
       setFeedback(data.feedback)
       if (data.correct) {

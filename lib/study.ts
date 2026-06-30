@@ -39,6 +39,16 @@ export function masteryFromScore(score: number): Mastery {
   return "red"
 }
 
+export function masteryToInt(m: Mastery): number {
+  const map: Record<Mastery, number> = { locked: 0, red: 1, amber: 2, green: 3 }
+  return map[m]
+}
+
+export function intToMastery(v: number): Mastery {
+  const map: Record<number, Mastery> = { 0: "locked", 1: "red", 2: "amber", 3: "green" }
+  return map[v] ?? "locked"
+}
+
 /** A node is unlocked when all its dependencies are at least amber. */
 export function isUnlocked(node: KnowledgeNode, progress: ProgressMap): boolean {
   if (node.deps.length === 0) return true
