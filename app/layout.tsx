@@ -118,7 +118,7 @@ export default async function RootLayout({
             {children}
           </ThemeProvider>
         </AuthProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Analytics />
       </body>
     </html>
   )
