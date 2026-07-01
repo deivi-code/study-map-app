@@ -6,6 +6,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Logo, ThemeToggle, AuthButton } from "@/components/brand"
 import { ExportImport } from "@/components/export-import"
+import { LocaleFooter } from "@/components/locale-footer"
+import { useTranslations } from "next-intl"
 
 function NavButton({
   active,
@@ -42,34 +44,37 @@ function NavButton({
 
 function AppNav() {
   const pathname = usePathname()
-  const match = pathname.match(/\/app\/([^/]+)/)
+  const t = useTranslations("main")
+  // pathname: /en/app/abc123 or /es/app/abc123 or /app/abc123
+  const match = pathname.match(/\/(?:en|es)?\/?app\/([^/]+)/) ?? pathname.match(/\/app\/([^/]+)/)
   const mapId = match?.[1]
   if (!mapId) return null
 
-  const isTree = pathname === `/app/${mapId}`
-  const isDashboard = pathname === `/app/${mapId}/dashboard`
+  const isTree = pathname.endsWith(`/app/${mapId}`) || pathname.includes(`/app/${mapId}`) && !pathname.includes('/dashboard')
+  const isDashboard = pathname.includes(`/app/${mapId}/dashboard`)
   if (!isTree && !isDashboard) return null
 
   return (
     <nav className="flex items-center gap-1 rounded-xl border border-border/60 bg-card/60 p-1">
-      <NavButton active={isTree} href={`/app/${mapId}`} icon={<Map className="h-4 w-4" />} label="Mapa" />
+      <NavButton active={isTree} href={`/app/${mapId}`} icon={<Map className="h-4 w-4" />} label={t("map")} />
       <NavButton
         active={isDashboard}
         href={`/app/${mapId}/dashboard`}
         icon={<BarChart3 className="h-4 w-4" />}
-        label="Progreso"
+        label={t("progress")}
       />
     </nav>
   )
 }
 
 export function MainLayoutClient({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("main")
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" aria-label="Ir al panel principal">
+            <Link href="/dashboard" aria-label={t("dashboardAria")}>
               <Logo />
             </Link>
             <AppNav />
@@ -80,7 +85,7 @@ export function MainLayoutClient({ children }: { children: React.ReactNode }) {
               className="hidden items-center gap-1.5 rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:flex"
             >
               <Plus className="h-4 w-4" />
-              Nuevo mapa
+              {t("newMap")}
             </Link>
             <ExportImport />
             <AuthButton />
@@ -89,6 +94,7 @@ export function MainLayoutClient({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <div className="flex-1">{children}</div>
+      <LocaleFooter />
     </div>
   )
 }

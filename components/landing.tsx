@@ -13,34 +13,20 @@ import {
 import { AuthButton, Logo, ThemeToggle } from "./brand"
 import { NodeField } from "./node-field"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { LocaleFooter } from "./locale-footer"
 
 const features = [
-  {
-    icon: MapIcon,
-    title: "Mapa visual del saber",
-    desc: "Tus apuntes se convierten en un árbol de conceptos conectados, con un orden lógico de aprendizaje.",
-  },
-  {
-    icon: BrainCircuit,
-    title: "Tests que se adaptan",
-    desc: "Cada nodo incluye un mini test. Respondes, recibes feedback y avanzas desbloqueando nuevos temas.",
-  },
-  {
-    icon: Target,
-    title: "Sabes qué dominas",
-    desc: "Cada concepto muestra tu nivel: por aprender, en progreso o dominado. Sin autoengaños.",
-  },
-  {
-    icon: Trophy,
-    title: "Progreso que motiva",
-    desc: "Racha de estudio, porcentaje de dominio y mensajes de coach para mantener el ritmo.",
-  },
+  { icon: MapIcon, titleKey: "feature1Title", descKey: "feature1Desc" },
+  { icon: BrainCircuit, titleKey: "feature2Title", descKey: "feature2Desc" },
+  { icon: Target, titleKey: "feature3Title", descKey: "feature3Desc" },
+  { icon: Trophy, titleKey: "feature4Title", descKey: "feature4Desc" },
 ]
 
 const steps = [
-  { n: "01", title: "Sube tus apuntes", desc: "Arrastra un PDF o pega tu texto." },
-  { n: "02", title: "Generamos el mapa", desc: "Detectamos conceptos y los conectamos." },
-  { n: "03", title: "Desbloquea y domina", desc: "Supera tests y avanza por el árbol." },
+  { n: "01", titleKey: "step1Title", descKey: "step1Desc" },
+  { n: "02", titleKey: "step2Title", descKey: "step2Desc" },
+  { n: "03", titleKey: "step3Title", descKey: "step3Desc" },
 ]
 
 function MiniTree() {
@@ -105,13 +91,13 @@ function MiniTree() {
 }
 
 export function Landing() {
+  const t = useTranslations("landing")
   return (
     <div className="relative min-h-screen overflow-hidden">
       <NodeField className="pointer-events-none absolute inset-0 opacity-70" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(60%_80%_at_50%_0%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent)]" />
 
       <div className="relative">
-        {/* Nav */}
         <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
           <Logo />
           <div className="flex items-center gap-3">
@@ -120,13 +106,12 @@ export function Landing() {
               href="/upload"
               className="hidden rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.03] sm:block"
             >
-              Empezar
+              {t("cta")}
             </Link>
             <AuthButton />
           </div>
         </header>
 
-        {/* Hero */}
         <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-10 lg:grid-cols-2 lg:pt-20">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -135,15 +120,14 @@ export function Landing() {
           >
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
               <Sparkles className="size-3.5 text-primary" />
-              Aprende como un sistema, no como una lista
+              {t("badge")}
             </div>
             <h1 className="text-balance text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
-              Convierte tus apuntes en un{" "}
-              <span className="text-primary">mapa de conocimiento</span>
+              {t("hero")}{" "}
+              <span className="text-primary">{t("heroHighlight")}</span>
             </h1>
             <p className="mt-5 max-w-md text-pretty leading-relaxed text-muted-foreground">
-              Sube tus apuntes y obtén un árbol interactivo de conceptos. Desbloquea
-              nodos superando tests y descubre con exactitud qué dominas y qué te falta.
+              {t("subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
@@ -151,21 +135,21 @@ export function Landing() {
                 className="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.03]"
               >
                 <Upload className="size-4" />
-                Subir apuntes
+                {t("cta")}
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
-              <span className="text-sm text-muted-foreground">Sin registro · Gratis</span>
+              <span className="text-sm text-muted-foreground">{t("freeTag")}</span>
             </div>
 
             <div className="mt-10 flex items-center gap-6">
               {[
-                { c: "var(--mastery-red)", t: "Por aprender" },
-                { c: "var(--mastery-amber)", t: "En progreso" },
-                { c: "var(--mastery-green)", t: "Dominado" },
+                { c: "var(--mastery-red)", key: "porAprender" },
+                { c: "var(--mastery-amber)", key: "enProgreso" },
+                { c: "var(--mastery-green)", key: "dominado" },
               ].map((s) => (
-                <div key={s.t} className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div key={s.key} className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="size-2.5 rounded-full" style={{ background: s.c }} />
-                  {s.t}
+                  {t(s.key)}
                 </div>
               ))}
             </div>
@@ -188,18 +172,17 @@ export function Landing() {
           </motion.div>
         </section>
 
-        {/* Features */}
         <section className="mx-auto max-w-6xl px-5 py-16">
           <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
-            Mucho mejor que releer apuntes
+            {t("featuresTitle")}
           </h2>
           <p className="mt-2 max-w-lg text-muted-foreground">
-            Un sistema de aprendizaje activo que te muestra el camino y te mantiene en marcha.
+            {t("featuresSubtitle")}
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f, i) => (
               <motion.div
-                key={f.title}
+                key={f.titleKey}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
@@ -209,14 +192,13 @@ export function Landing() {
                 <span className="grid size-10 place-items-center rounded-xl bg-primary/12 text-primary ring-1 ring-primary/20">
                   <f.icon className="size-5" />
                 </span>
-                <h3 className="mt-4 font-semibold">{f.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+                <h3 className="mt-4 font-semibold">{t(f.titleKey)}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t(f.descKey)}</p>
               </motion.div>
             ))}
           </div>
         </section>
 
-        {/* How it works */}
         <section className="mx-auto max-w-6xl px-5 py-16">
           <div className="grid gap-4 md:grid-cols-3">
             {steps.map((s, i) => (
@@ -229,35 +211,35 @@ export function Landing() {
                 className="rounded-2xl border border-border bg-card/40 p-6"
               >
                 <span className="font-mono text-sm text-primary">{s.n}</span>
-                <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+                <h3 className="mt-3 text-lg font-semibold">{t(s.titleKey)}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{t(s.descKey)}</p>
               </motion.div>
             ))}
           </div>
         </section>
 
-        {/* CTA */}
         <section className="mx-auto max-w-6xl px-5 pb-24 pt-6">
           <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card p-10 text-center sm:p-14">
             <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
-              Empieza a estudiar con claridad
+              {t("ctaSectionTitle")}
             </h2>
             <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-              Sube tus apuntes y construye tu primer mapa de conocimiento en segundos.
+              {t("ctaSectionDesc")}
             </p>
             <Link
               href="/upload"
               className="mt-7 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.03]"
             >
               <Upload className="size-4" />
-              Subir apuntes
+              {t("ctaSectionBtn")}
             </Link>
           </div>
           <p className="mt-10 text-center text-xs text-muted-foreground">
-            Study Map · Tu coach académico personal
+            {t("footer")}
           </p>
         </section>
       </div>
+      <LocaleFooter />
     </div>
   )
 }

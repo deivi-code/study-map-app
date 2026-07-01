@@ -11,6 +11,7 @@ import { recordLessonAction } from "@/lib/actions/record-lesson"
 import { validateAnswerAction } from "@/lib/actions/validate-answer"
 import { masteryFromScore, masteryMeta } from "@/lib/study"
 import type { ChoiceStep, TextStep, TheoryStep } from "@/lib/types"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
 export function LessonMode({ onClose: externalClose, mapId }: { onClose?: () => void; mapId?: string }) {
@@ -35,6 +36,7 @@ export function LessonMode({ onClose: externalClose, mapId }: { onClose?: () => 
 }
 
 function ConfirmDialog({ onConfirm, onCancel, mapId }: { onConfirm: () => void; onCancel: () => void; mapId?: string }) {
+  const t = useTranslations("lesson")
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -46,23 +48,23 @@ function ConfirmDialog({ onConfirm, onCancel, mapId }: { onConfirm: () => void; 
         animate={{ scale: 1, opacity: 1 }}
         className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl"
       >
-        <h3 className="text-lg font-semibold">¿Salir de la lección?</h3>
+        <h3 className="text-lg font-semibold">{t('exitTitle')}</h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          Se perderá el progreso de este nodo. Puedes volver a intentarlo después.
+          {t('exitDesc')}
         </p>
         <div className="mt-6 flex gap-3">
           <button
             onClick={onCancel}
             className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
           >
-            Continuar
+            {t('continue')}
           </button>
           <Link
             href={`/app/${mapId}`}
             onClick={onConfirm}
             className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:opacity-90"
           >
-            Salir
+            {t('exit')}
           </Link>
         </div>
       </motion.div>
@@ -71,6 +73,7 @@ function ConfirmDialog({ onConfirm, onCancel, mapId }: { onConfirm: () => void; 
 }
 
 function LessonRunner({ nodeId, onClose, mapId }: { nodeId: string; onClose: () => void; mapId?: string }) {
+  const t = useTranslations("lesson")
   const { map, recordLesson, closeNode } = useStudy()
   const node = map!.nodes.find((n) => n.id === nodeId)!
   const steps = node.steps
@@ -147,7 +150,7 @@ function LessonRunner({ nodeId, onClose, mapId }: { nodeId: string; onClose: () 
         <header className="flex items-center gap-4 py-6">
           <button
             onClick={handleExit}
-            aria-label="Salir de la lección"
+            aria-label={t('exitAria')}
             className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <X className="size-5" />
@@ -158,7 +161,7 @@ function LessonRunner({ nodeId, onClose, mapId }: { nodeId: string; onClose: () 
             aria-valuenow={Math.round(progressPct)}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label="Progreso de la lección"
+            aria-label={t('progressAria')}
           >
             <motion.div
               className="h-full rounded-full bg-primary"
@@ -167,7 +170,7 @@ function LessonRunner({ nodeId, onClose, mapId }: { nodeId: string; onClose: () 
             />
           </div>
           <span className="text-sm tabular-nums text-muted-foreground">
-            Paso {index + 1}/{total}
+            {t('step')} {index + 1}/{total}
           </span>
         </header>
 
@@ -219,12 +222,13 @@ function LessonRunner({ nodeId, onClose, mapId }: { nodeId: string; onClose: () 
 }
 
 function TheoryStepView({ step, onContinue }: { step: TheoryStep; onContinue: () => void }) {
+  const t = useTranslations("lesson")
   return (
     <>
       <div className="mt-6 rounded-2xl border border-primary/25 bg-primary/5 p-6">
         <div className="mb-3 flex items-center gap-2 text-sm font-medium text-primary">
           <BookOpen className="size-4" />
-          Teoría
+          {t('theory')}
         </div>
         <p className="text-pretty leading-relaxed text-foreground/90">{step.content}</p>
       </div>
@@ -233,7 +237,7 @@ function TheoryStepView({ step, onContinue }: { step: TheoryStep; onContinue: ()
           onClick={onContinue}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:scale-[1.01]"
         >
-          Continuar
+          {t('continue')}
           <ArrowRight className="size-4" />
         </button>
       </div>
@@ -250,6 +254,7 @@ function ChoiceStepView({
   onAnswered: (correct: boolean) => void
   onNext: () => void
 }) {
+  const t = useTranslations("lesson")
   const [selected, setSelected] = useState<number | null>(null)
   const [shake, setShake] = useState(false)
   const answered = selected !== null
@@ -329,7 +334,7 @@ function ChoiceStepView({
                 className="font-semibold"
                 style={{ color: isCorrect ? "var(--mastery-green)" : "var(--mastery-red)" }}
               >
-                {isCorrect ? "¡Correcto! " : "Incorrecto. "}
+                {isCorrect ? `${t('correct')} ` : `${t('incorrect')} `}
               </span>
               {step.explanation}
             </motion.div>
@@ -342,7 +347,7 @@ function ChoiceStepView({
           disabled={!answered}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Siguiente
+          {t('next')}
           <ArrowRight className="size-4" />
         </button>
       </div>
@@ -361,6 +366,7 @@ function TextStepView({
   onAnswered: (correct: boolean) => void
   onNext: () => void
 }) {
+  const t = useTranslations("lesson")
   const [input, setInput] = useState("")
   const [answered, setAnswered] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
@@ -411,9 +417,9 @@ function TextStepView({
           {step.question}
         </h2>
         <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground/80">Pista:</span> {step.hint}
+          <span className="font-medium text-foreground/80">{t('hint')}</span> {step.hint}
         </p>
-        <label htmlFor="lesson-text-answer" className="sr-only">Escribe tu respuesta</label>
+        <label htmlFor="lesson-text-answer" className="sr-only">{t('answerLabel')}</label>
         <input
           id="lesson-text-answer"
           type="text"
@@ -421,7 +427,7 @@ function TextStepView({
           onChange={(e) => setInput(e.target.value)}
           disabled={answered && isCorrect}
           onKeyDown={(e) => e.key === "Enter" && !answered && checkLocal()}
-          placeholder="Escribe tu respuesta…"
+          placeholder={t('answerPlaceholder')}
           className="mt-6 w-full rounded-xl border border-border bg-card/60 px-4 py-3.5 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/60 disabled:opacity-60"
         />
         {!answered && (
@@ -430,7 +436,7 @@ function TextStepView({
             disabled={!input.trim()}
             className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 text-sm font-medium transition-colors enabled:hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Comprobar
+            {t('check')}
           </button>
         )}
         <AnimatePresence>
@@ -449,7 +455,7 @@ function TextStepView({
                 className="font-semibold"
                 style={{ color: isCorrect ? "var(--mastery-green)" : "var(--mastery-red)" }}
               >
-                {isCorrect ? "¡Correcto! " : "Incorrecto. "}
+                {isCorrect ? `${t('correct')} ` : `${t('incorrect')} `}
               </span>
               {(aiFeedback ?? feedback) || step.explanation}
             </motion.div>
@@ -465,7 +471,7 @@ function TextStepView({
             ) : (
               <Sparkles className="size-4" />
             )}
-            Pedir revisión con IA
+            {t('aiReview')}
           </button>
         )}
         {answered && !isCorrect && aiFeedback && !aiLoading && (
@@ -473,7 +479,7 @@ function TextStepView({
             onClick={() => { setAnswered(false); setAiFeedback(null); setFeedback(null) }}
             className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 text-sm font-medium transition-colors hover:bg-accent"
           >
-            Reintentar respuesta
+            {t('retryAnswer')}
           </button>
         )}
       </motion.div>
@@ -483,7 +489,7 @@ function TextStepView({
           disabled={!answered}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Siguiente
+          {t('next')}
           <ArrowRight className="size-4" />
         </button>
       </div>
@@ -510,6 +516,7 @@ function Results({
   closeNode: () => void
   mapId?: string
 }) {
+  const t = useTranslations("lesson")
   const mastery = masteryFromScore(score)
   const meta = masteryMeta[mastery]
   const circ = 2 * Math.PI * 52
@@ -548,7 +555,7 @@ function Results({
             {score}%
           </motion.span>
           <span className="text-xs text-muted-foreground">
-            {total > 0 ? `${correct}/${total} aciertos` : "Lección sin preguntas"}
+            {total > 0 ? `${correct}/${total} ${t('resultsCorrect')}` : t('resultsNoQuestions')}
           </span>
         </div>
       </div>
@@ -569,14 +576,14 @@ function Results({
           href={`/app/${mapId}`}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01]"
         >
-          Volver al mapa
+          {t('backToMap')}
         </Link>
         <button
           onClick={onRetry}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3.5 text-sm font-medium transition-colors hover:bg-accent"
         >
           <RotateCcw className="size-4" />
-          Repetir lección
+          {t('repeatLesson')}
         </button>
       </div>
     </motion.div>

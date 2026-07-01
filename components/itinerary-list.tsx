@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context"
 import { deleteMapAction } from "@/lib/actions/delete-map"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import { useTranslations, useLocale } from 'next-intl'
 
 interface MapMeta {
   id: string
@@ -22,6 +23,8 @@ interface ItineraryListProps {
 }
 
 export function ItineraryList({ onClose }: ItineraryListProps) {
+  const t = useTranslations('itinerary')
+  const locale = useLocale()
   const { user } = useAuth()
   const router = useRouter()
   const [maps, setMaps] = useState<MapMeta[]>([])
@@ -36,11 +39,11 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
       setIsLoading(true)
       setError(null)
       const res = await fetch("/api/list-maps")
-      if (!res.ok) throw new Error("Error al cargar los mapas")
+      if (!res.ok) throw new Error(t('loadError'))
       const data = await res.json()
       setMaps(data.maps || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido")
+      setError(err instanceof Error ? err.message : t('unknownError'))
     } finally {
       setIsLoading(false)
     }
@@ -58,25 +61,25 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
 
   const handleDeleteMap = async (mapId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!confirm("¿Eliminar este itinerario? Esta acción no se puede deshacer.")) return
+    if (!confirm(t('deleteConfirm'))) return
     
     try {
       setDeletingId(mapId)
       const result = await deleteMapAction(mapId)
-      if (!result.success) throw new Error(result.error ?? "Error al eliminar")
+      if (!result.success) throw new Error(result.error ?? t('deleteError'))
       setMaps((prev) => prev.filter((m) => m.id !== mapId))
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al eliminar el mapa")
+      setError(err instanceof Error ? err.message : t('deleteError'))
     } finally {
       setDeletingId(null)
     }
   }
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
+    return new Date(timestamp).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
     })
   }
 
@@ -106,7 +109,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
               <Map className="size-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">Mis itinerarios</h2>
+              <h2 className="text-lg font-semibold tracking-tight">{t('title')}</h2>
               {isLoading ? (
                 <div className="mt-1 flex items-center gap-1.5">
                   <div className="h-3 w-24 animate-pulse rounded-md bg-muted-foreground/15" />
@@ -114,7 +117,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
                   <div className="h-3 w-14 animate-pulse rounded-md bg-muted-foreground/15" />
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground">{maps.length} mapa{maps.length !== 1 ? "s" : ""} guardado{maps.length !== 1 ? "s" : ""}</p>
+                <p className="text-xs text-muted-foreground">{maps.length} {t('mapsCount')}</p>
               )}
             </div>
           </div>
@@ -132,7 +135,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
             {isLoading && (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="size-8 animate-spin text-muted-foreground" />
-                <p className="mt-3 text-sm text-muted-foreground">Cargando itinerarios...</p>
+                <p className="mt-3 text-sm text-muted-foreground">{t('loading')}</p>
               </div>
             )}
 
@@ -144,7 +147,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
                   onClick={fetchMaps}
                   className="mt-4 rounded-lg border border-border px-4 py-2 text-sm hover:bg-accent"
                 >
-                  Reintentar
+                  {t('retry')}
                 </button>
               </div>
             )}
@@ -152,9 +155,9 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
             {!isLoading && !error && maps.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12">
                 <FileQuestion className="size-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-lg font-medium">Aún no tienes itinerarios</h3>
+                <h3 className="mt-4 text-lg font-medium">{t('emptyTitle')}</h3>
                 <p className="mt-2 text-center text-sm text-muted-foreground">
-                  Crea tu primer mapa de estudio desde la página de inicio.
+                  {t('emptyDesc')}
                 </p>
               </div>
             )}
@@ -195,7 +198,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
                           </span>
                           <span className="flex items-center gap-1">
                             <Layers className="size-3.5" />
-                            {map.nodeCount} nodos
+                            {map.nodeCount} {t('nodes')}
                           </span>
                         </div>
                         {map.sourceType && (
@@ -211,7 +214,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
                           onClick={() => handleSelectMap(map.id)}
                           disabled={loadingId !== null}
                           className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary disabled:cursor-not-allowed"
-                          title="Abrir mapa"
+                          title={t('openMap')}
                         >
                           {loadingId === map.id ? (
                             <Loader2 className="size-4 animate-spin" />
@@ -223,7 +226,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
                           onClick={(e) => handleDeleteMap(map.id, e)}
                           disabled={deletingId !== null}
                           className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive disabled:cursor-not-allowed"
-                          title="Eliminar mapa"
+                          title={t('deleteMap')}
                         >
                           {deletingId === map.id ? (
                             <Loader2 className="size-4 animate-spin" />
@@ -244,7 +247,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
         {!isLoading && !error && maps.length > 0 && (
           <footer className="border-t border-border p-4">
             <p className="text-center text-xs text-muted-foreground">
-              Haz clic en un mapa para abrirlo
+              {t('footerHint')}
             </p>
           </footer>
         )}

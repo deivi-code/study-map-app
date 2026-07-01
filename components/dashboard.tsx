@@ -5,23 +5,25 @@ import { CheckCircle2, Flame, Target, TrendingUp, FileQuestion } from "lucide-re
 import { useStudy } from "@/lib/store"
 import { computeStats, getMastery, masteryMeta } from "@/lib/study"
 import Link from "next/link"
+import { useTranslations } from 'next-intl'
 
 export function Dashboard() {
+  const t = useTranslations('dashboard')
   const { map, progress, streak, openNode } = useStudy()
   if (!map) {
     return (
       <div className="mx-auto max-w-5xl px-5 py-16">
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <FileQuestion className="size-16 text-muted-foreground/40" />
-          <h3 className="mt-6 text-xl font-semibold">No hay mapa cargado</h3>
+          <h3 className="mt-6 text-xl font-semibold">{t('noMapTitle')}</h3>
           <p className="mt-2 max-w-sm text-muted-foreground">
-            Selecciona un itinerario o crea uno nuevo para ver tu progreso.
+            {t('noMapDesc')}
           </p>
           <Link
             href="/upload"
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.02]"
           >
-            Subir apuntes
+            {t('uploadNotes')}
           </Link>
         </div>
       </div>
@@ -32,14 +34,14 @@ export function Dashboard() {
 
   const coach =
     stats.overall >= 80
-      ? "Vas como un crack. ¡Casi dominas todo el mapa!"
+      ? t('coachHigh')
       : stats.overall >= 40
-        ? "Buen ritmo. Refuerza los nodos débiles para subir de nivel."
-        : "Acabas de empezar. Desbloquea nodos completando lecciones."
+        ? t('coachMid')
+        : t('coachLow')
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Tu progreso</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t('yourProgress')}</h1>
       <p className="mt-1 text-muted-foreground">{coach}</p>
 
       <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -68,17 +70,17 @@ export function Dashboard() {
             </svg>
             <div className="absolute flex flex-col items-center">
               <span className="text-4xl font-semibold tabular-nums">{stats.overall}%</span>
-              <span className="text-xs text-muted-foreground">dominio total</span>
+              <span className="text-xs text-muted-foreground">{t('totalMastery')}</span>
             </div>
           </div>
         </motion.div>
 
         {/* Stat cards */}
         <div className="grid gap-4 md:col-span-2 md:grid-cols-2">
-          <StatCard icon={CheckCircle2} label="Nodos dominados" value={`${stats.green}/${stats.total}`} color="var(--mastery-green)" delay={0.05} />
-          <StatCard icon={Target} label="Nodos débiles" value={`${stats.weak.length}`} color="var(--mastery-amber)" delay={0.1} />
-          <StatCard icon={Flame} label="Racha de estudio" value={`${streak}`} suffix="lecciones" color="var(--mastery-red)" delay={0.15} />
-          <StatCard icon={TrendingUp} label="Por explorar" value={`${stats.locked + stats.red}`} color="var(--primary)" delay={0.2} />
+          <StatCard icon={CheckCircle2} label={t('nodesMastered')} value={`${stats.green}/${stats.total}`} color="var(--mastery-green)" delay={0.05} />
+          <StatCard icon={Target} label={t('weakNodes')} value={`${stats.weak.length}`} color="var(--mastery-amber)" delay={0.1} />
+          <StatCard icon={Flame} label={t('studyStreak')} value={`${streak}`} suffix={t('lessons')} color="var(--mastery-red)" delay={0.15} />
+          <StatCard icon={TrendingUp} label={t('toExplore')} value={`${stats.locked + stats.red}`} color="var(--primary)" delay={0.2} />
         </div>
       </div>
 
@@ -89,7 +91,7 @@ export function Dashboard() {
         transition={{ delay: 0.1 }}
         className="mt-4 rounded-2xl border border-border bg-card/60 p-6"
       >
-        <h2 className="text-sm font-semibold text-muted-foreground">Distribución de dominio</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground">{t('distribution')}</h2>
         <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-muted">
           {[
             { v: stats.green, c: "var(--mastery-green)" },
@@ -123,7 +125,7 @@ export function Dashboard() {
         transition={{ delay: 0.15 }}
         className="mt-4 rounded-2xl border border-border bg-card/60 p-6"
       >
-        <h2 className="text-sm font-semibold text-muted-foreground">Dominio por concepto</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground">{t('perConcept')}</h2>
         <div className="mt-4 space-y-3">
           {map.nodes.map((node, i) => {
             const m = getMastery(node.id, node, progress)
@@ -165,7 +167,7 @@ export function Dashboard() {
         >
           <h2 className="flex items-center gap-2 text-sm font-semibold">
             <Target className="size-4 text-mastery-amber" />
-            Repasa estos conceptos
+            {t('reviewThese')}
           </h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {stats.weak.map((node) => (

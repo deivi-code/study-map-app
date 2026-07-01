@@ -71,25 +71,37 @@ export default async function OGImage() {
           Study Map
         </h1>
 
-        <p
-          style={{
-            fontSize: 24,
-            color: MUTED,
-            marginTop: 16,
-            marginBottom: 40,
-            textAlign: "center",
-            maxWidth: 520,
-            lineHeight: 1.4,
-          }}
-        >
-          Convierte tus apuntes en conocimiento
-        </p>
+        <div style={{ display: "flex", gap: 48, marginTop: 16, marginBottom: 40 }}>
+          <p
+            style={{
+              fontSize: 22,
+              color: MUTED,
+              textAlign: "center",
+              lineHeight: 1.4,
+              margin: 0,
+            }}
+          >
+            Interactive Knowledge Maps
+          </p>
+          <p
+            style={{
+              fontSize: 22,
+              color: MUTED,
+              textAlign: "center",
+              lineHeight: 1.4,
+              margin: 0,
+              opacity: 0.5,
+            }}
+          >
+            Mapas de conocimiento interactivos
+          </p>
+        </div>
 
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
           {[
-            { color: RED, label: "Por aprender" },
-            { color: AMBER, label: "En progreso" },
-            { color: GREEN, label: "Dominado" },
+            { color: RED, label: "To learn" },
+            { color: AMBER, label: "In progress" },
+            { color: GREEN, label: "Mastered" },
           ].map((s) => (
             <div
               key={s.label}

@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/lib/theme-context'
+import { cookies } from 'next/headers'
 import './globals.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -12,29 +13,31 @@ const geistMono = Geist_Mono({
 })
 
 const APP_NAME = 'Study Map'
-const APP_DESCRIPTION =
-  'Transforma tus apuntes en un árbol de conocimiento interactivo. Aprende activamente con tests, visualiza tu progreso y descubre exactamente qué dominas.'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://estudio-mapa.vercel.app'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
   title: {
-    default: `${APP_NAME} — Domina lo que estudias con mapas interactivos`,
+    default: `${APP_NAME} — Interactive Knowledge Maps`,
     template: `%s — ${APP_NAME}`,
   },
-  description: APP_DESCRIPTION,
   generator: 'v0.app',
   manifest: '/manifest.json',
   applicationName: APP_NAME,
   category: 'education',
   keywords: [
+    'study map',
+    'knowledge map',
+    'concept map',
+    'active learning',
+    'interactive learning',
+    'study tool',
+    'knowledge tree',
+    'academic progress',
     'mapa de estudio',
-    'mapa conceptual',
-    'aprendizaje activo',
-    'organizador de estudio',
+    'mapa de conocimiento',
+    'aprendizaje interactivo',
     'árbol de conocimiento',
-    'tests de estudio',
-    'apuntes online',
-    'progreso académico',
   ],
   authors: [{ name: 'Study Map' }],
   icons: {
@@ -55,11 +58,10 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
   openGraph: {
-    title: `${APP_NAME} — Domina lo que estudias con mapas interactivos`,
-    description: APP_DESCRIPTION,
+    title: `${APP_NAME} — Interactive Knowledge Maps`,
+    description: 'Turn your notes into an interactive knowledge tree. Learn actively with tests, visualize your progress, and discover exactly what you know.',
     url: APP_URL,
     siteName: APP_NAME,
-    locale: 'es_ES',
     type: 'website',
     images: [
       {
@@ -72,14 +74,20 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${APP_NAME} — Domina lo que estudias con mapas interactivos`,
-    description: APP_DESCRIPTION,
+    title: `${APP_NAME} — Interactive Knowledge Maps`,
+    description: 'Turn your notes into an interactive knowledge tree. Learn actively with tests, visualize your progress, and discover exactly what you know.',
     images: ['/opengraph-image.png'],
-    creator: '@estudiomapa',
+    creator: '@studymap',
   },
   robots: {
     index: true,
     follow: true,
+  },
+  alternates: {
+    languages: {
+      en: `${APP_URL}/en`,
+      es: `${APP_URL}/es`,
+    },
   },
 }
 
@@ -91,14 +99,17 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const cookieStore = await cookies()
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'es'
+
   return (
     <html
-      lang="es"
+      lang={locale}
       className={`dark ${geistSans.variable} ${geistMono.variable} bg-background`}
     >
       <body className="font-sans antialiased">
