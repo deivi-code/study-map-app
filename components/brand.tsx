@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context"
 import { useTheme } from "@/lib/theme-context"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 import { useState } from "react"
 import { ItineraryList } from "./itinerary-list"
 import { AnimatePresence } from "framer-motion"
@@ -114,8 +115,8 @@ export function AuthButton({ className }: { className?: string }) {
               <Map className="h-4 w-4" />
               <span className="hidden sm:inline">Mis itinerarios</span>
             </button>
-            <button
-              onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
+            <Link
+              href="/login"
               className={cn(
                 "flex items-center gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent",
                 className,
@@ -123,7 +124,7 @@ export function AuthButton({ className }: { className?: string }) {
             >
               <LogIn className="h-4 w-4" />
               <span className="hidden sm:inline">Iniciar sesión</span>
-            </button>
+            </Link>
           </>
         )}
       </div>
