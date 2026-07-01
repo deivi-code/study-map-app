@@ -11,7 +11,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
-const APP_NAME = 'Mapa de Estudio'
+const APP_NAME = 'Study Map'
 const APP_DESCRIPTION =
   'Transforma tus apuntes en un árbol de conocimiento interactivo. Aprende activamente con tests, visualiza tu progreso y descubre exactamente qué dominas.'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://estudio-mapa.vercel.app'
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     'apuntes online',
     'progreso académico',
   ],
-  authors: [{ name: 'Mapa de Estudio' }],
+  authors: [{ name: 'Study Map' }],
   icons: {
     icon: [
       {

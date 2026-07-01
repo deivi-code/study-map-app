@@ -254,7 +254,7 @@ export function Landing() {
             </Link>
           </div>
           <p className="mt-10 text-center text-xs text-muted-foreground">
-            Mapa de Estudio · Tu coach académico personal
+            Study Map · Tu coach académico personal
           </p>
         </section>
       </div>

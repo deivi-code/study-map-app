@@ -68,7 +68,7 @@ export default async function OGImage() {
             textAlign: "center",
           }}
         >
-          Mapa de Estudio
+          Study Map
         </h1>
 
         <p
