@@ -4,6 +4,7 @@ import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
 import { Check, Lightbulb, Lock, Play, RotateCcw, X } from "lucide-react"
 import { useEffect, useRef } from "react"
+import { useTranslations } from "next-intl"
 import { lessonStepSummary } from "@/lib/lesson"
 import { useStudy } from "@/lib/store"
 import { getMastery, masteryMeta } from "@/lib/study"
@@ -72,6 +73,7 @@ export function NodeDrawer() {
             aria-label={node.title}
           >
             {(() => {
+              const t = useTranslations("nodeDrawer")
               const m = getMastery(node.id, node, progress)
               const meta = masteryMeta[m]
               const p = progress[node.id]
@@ -105,7 +107,7 @@ export function NodeDrawer() {
                     </div>
                     <button
                       onClick={closeNode}
-                      aria-label="Cerrar"
+                      aria-label={t('close')}
                       className="grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     >
                       <X className="size-5" />
@@ -117,7 +119,7 @@ export function NodeDrawer() {
                       <div className="rounded-xl border border-mastery-locked/30 bg-mastery-locked/10 p-4">
                         <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
                           <Lock className="size-4" />
-                          Requisitos para desbloquear
+                          {t('requirements')}
                         </h3>
                         <ul className="mt-3 space-y-2">
                           {deps.map((dep) => dep && (
@@ -140,7 +142,7 @@ export function NodeDrawer() {
 
                     <div>
                       <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Progreso del nodo</span>
+                        <span>{t('progress')}</span>
                         <span style={{ color: meta.color }}>{pct}%</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -154,20 +156,20 @@ export function NodeDrawer() {
                       </div>
                       {p && (
                         <p className="mt-2 text-xs text-muted-foreground">
-                          {p.attempts} {p.attempts === 1 ? "intento" : "intentos"} · {meta.coach}
+                          {p.attempts} {p.attempts === 1 ? t('attempt') : t('attempts')} · {meta.coach}
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-semibold text-muted-foreground">Explicación</h3>
+                      <h3 className="text-sm font-semibold text-muted-foreground">{t('explanation')}</h3>
                       <p className="mt-2 leading-relaxed text-foreground/90">{node.detail}</p>
                     </div>
 
                     <div>
                       <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
                         <Lightbulb className="size-4 text-mastery-amber" />
-                        Ejemplos
+                        {t('examples')}
                       </h3>
                       <ul className="mt-3 space-y-2">
                         {node.examples.map((ex, i) => (
@@ -183,16 +185,16 @@ export function NodeDrawer() {
                     </div>
 
                     <div className="rounded-xl border border-border bg-background/40 p-3 text-sm text-muted-foreground">
-                      {total} pasos en esta lección
-                      {theory > 0 && ` · ${theory} teoría`}
-                      {assessable > 0 && ` · ${assessable} preguntas`}
+                      {total} {t('stepsLabel')}
+                      {theory > 0 && ` · ${theory} ${t('theoryLabel')}`}
+                      {assessable > 0 && ` · ${assessable} ${t('questionsLabel')}`}
                     </div>
                   </div>
 
                   <footer className="border-t border-border p-6">
                     {locked ? (
                       <div className="rounded-xl border border-border bg-muted/30 p-3 text-center text-sm text-muted-foreground">
-                        Desbloquea los requisitos para acceder
+                        {t('lockedMessage')}
                       </div>
                     ) : (
                       <Link
@@ -200,7 +202,7 @@ export function NodeDrawer() {
                         className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.01]"
                       >
                         {p ? <RotateCcw className="size-4" /> : <Play className="size-4" />}
-                        {p ? "Repetir lección" : "Empezar lección"}
+                        {p ? t('repeatLesson') : t('startLesson')}
                       </Link>
                     )}
                   </footer>

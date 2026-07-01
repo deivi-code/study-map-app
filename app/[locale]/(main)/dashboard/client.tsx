@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Map, Calendar, Layers, Trash2, ChevronRight, Loader2, AlertCircle, FileQuestion, TrendingUp, Target, CheckCircle2, Flame } from "lucide-react"
+import { useTranslations, useLocale } from 'next-intl'
 import { deleteMapAction } from "@/lib/actions/delete-map"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -35,30 +36,32 @@ export function DashboardClient({
   latestSnapshot: SnapshotData | null
 }) {
   const router = useRouter()
+  const t = useTranslations('dashboardPage')
+  const locale = useLocale()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleDeleteMap = async (mapId: string) => {
-    if (!confirm("¿Eliminar este itinerario? Esta acción no se puede deshacer.")) return
+    if (!confirm(t('deleteConfirm'))) return
     try {
       setDeletingId(mapId)
       const result = await deleteMapAction(mapId)
-      if (!result.success) throw new Error(result.error ?? "Error al eliminar")
+      if (!result.success) throw new Error(result.error ?? t('deleteError'))
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al eliminar el mapa")
+      setError(err instanceof Error ? err.message : t('deleteError'))
     } finally {
       setDeletingId(null)
     }
   }
 
   const formatDate = (timestamp: number) =>
-    new Date(timestamp).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })
+    new Date(timestamp).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Panel de control</h1>
-      <p className="mt-1 text-muted-foreground">Tus mapas de estudio y progreso general.</p>
+      <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+      <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
 
       {/* Snapshot */}
       {latestSnapshot && (
@@ -70,14 +73,14 @@ export function DashboardClient({
           <div className="grid gap-6 p-6 md:grid-cols-[1fr_auto]">
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Donde lo dejaste
+                {t('whereYouLeft')}
               </h2>
               <h3 className="mt-2 text-xl font-semibold">{latestSnapshot.title}</h3>
               <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <SnapshotStat icon={TrendingUp} label="Dominio total" value={`${latestSnapshot.overall}%`} />
-                <SnapshotStat icon={CheckCircle2} label="Nodos dominados" value={`${latestSnapshot.greenNodes}/${latestSnapshot.totalNodes}`} color="var(--mastery-green)" />
-                <SnapshotStat icon={Target} label="Débiles" value={`${latestSnapshot.weakCount}`} color="var(--mastery-amber)" />
-                <SnapshotStat icon={Flame} label="Racha" value={`${latestSnapshot.streak}`} suffix="" />
+                <SnapshotStat icon={TrendingUp} label={t('totalMastery')} value={`${latestSnapshot.overall}%`} />
+                <SnapshotStat icon={CheckCircle2} label={t('nodesMastered')} value={`${latestSnapshot.greenNodes}/${latestSnapshot.totalNodes}`} color="var(--mastery-green)" />
+                <SnapshotStat icon={Target} label={t('weakNodes')} value={`${latestSnapshot.weakCount}`} color="var(--mastery-amber)" />
+                <SnapshotStat icon={Flame} label={t('streak')} value={`${latestSnapshot.streak}`} suffix="" />
               </div>
             </div>
             <div className="flex items-end">
@@ -85,7 +88,7 @@ export function DashboardClient({
                 href={`/app/${latestSnapshot.mapId}`}
                 className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.02]"
               >
-                Continuar
+                {t('continue')}
                 <ChevronRight className="size-4" />
               </Link>
             </div>
@@ -102,15 +105,15 @@ export function DashboardClient({
           className="mt-12 flex flex-col items-center justify-center py-16 text-center"
         >
           <FileQuestion className="size-16 text-muted-foreground/40" />
-          <h3 className="mt-6 text-xl font-semibold">Aún no tienes itinerarios</h3>
+          <h3 className="mt-6 text-xl font-semibold">{t('emptyTitle')}</h3>
           <p className="mt-2 max-w-sm text-muted-foreground">
-            Crea tu primer mapa de estudio desde la página de carga de apuntes.
+            {t('emptyDesc')}
           </p>
           <Link
             href="/upload"
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.02]"
           >
-            Subir apuntes
+            {t('uploadNotes')}
           </Link>
         </motion.div>
       )}
@@ -123,8 +126,8 @@ export function DashboardClient({
           transition={{ delay: 0.1 }}
           className="mt-8"
         >
-          <h2 className="text-lg font-semibold tracking-tight">Mis itinerarios</h2>
-          <p className="text-sm text-muted-foreground">{maps.length} mapa{maps.length !== 1 ? "s" : ""} guardado{maps.length !== 1 ? "s" : ""}</p>
+          <h2 className="text-lg font-semibold tracking-tight">{t('myItineraries')}</h2>
+          <p className="text-sm text-muted-foreground">{maps.length} {t('mapsCount')}</p>
 
           {error && (
             <p className="mt-3 rounded-xl border border-mastery-red/40 bg-mastery-red/10 px-4 py-3 text-sm text-mastery-red">
@@ -167,7 +170,7 @@ export function DashboardClient({
                     <Link
                       href={`/app/${map.id}`}
                       className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary"
-                      title="Abrir mapa"
+                      title={t('openMap')}
                     >
                       <ChevronRight className="size-4" />
                     </Link>
@@ -175,7 +178,7 @@ export function DashboardClient({
                       onClick={() => handleDeleteMap(map.id)}
                       disabled={deletingId !== null}
                       className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive disabled:cursor-not-allowed"
-                      title="Eliminar mapa"
+                      title={t('deleteMap')}
                     >
                       {deletingId === map.id ? (
                         <Loader2 className="size-4 animate-spin" />

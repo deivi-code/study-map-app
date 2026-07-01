@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useState, useActionState } from "react"
+import { useTranslations } from 'next-intl'
 import { useFormStatus } from "react-dom"
 import { ArrowLeft, FileText, Loader2, Sparkles, Upload, X } from "lucide-react"
 import { generateMapAction } from "@/lib/actions/generate-map"
@@ -9,6 +10,7 @@ import Link from "next/link"
 
 function SubmitButton({ canGenerate }: { canGenerate: boolean }) {
   const { pending } = useFormStatus()
+  const t = useTranslations('upload')
   return (
     <button
       type="submit"
@@ -16,12 +18,13 @@ function SubmitButton({ canGenerate }: { canGenerate: boolean }) {
       className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-      {pending ? "Generando…" : "Generar mapa"}
+      {pending ? t('generating') : t('generate')}
     </button>
   )
 }
 
 export default function UploadPage() {
+  const t = useTranslations('upload')
   const [text, setText] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -44,15 +47,15 @@ export default function UploadPage() {
           className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Volver
+          {t('back')}
         </Link>
         <Logo />
         <ThemeToggle />
       </header>
       <main className="mx-auto max-w-3xl px-5 py-10">
-        <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Sube tus apuntes</h1>
+        <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">{t('title')}</h1>
         <p className="mt-2 text-muted-foreground">
-          Arrastra un PDF o pega tu texto. Construiremos tu mapa de conocimiento.
+          {t('subtitle')}
         </p>
 
         <form action={formAction}>
@@ -81,7 +84,7 @@ export default function UploadPage() {
                 <button
                   type="button"
                   onClick={() => { setFile(null); if (inputRef.current) inputRef.current.value = "" }}
-                  aria-label="Quitar archivo"
+                  aria-label={t('removeFile')}
                   className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   <X className="size-4" />
@@ -93,16 +96,16 @@ export default function UploadPage() {
                   <Upload className="size-6" />
                 </span>
                 <p className="mt-4 text-sm font-medium">
-                  Arrastra tu PDF aquí o{" "}
+                  {t('dropPlaceholder')}{" "}
                   <button
                     type="button"
                     onClick={() => inputRef.current?.click()}
                     className="text-primary underline-offset-4 hover:underline"
                   >
-                    selecciona un archivo
+                    {t('selectFile')}
                   </button>
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">PDF, TXT, MD · máx. 5 MB</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t('fileLimit')}</p>
               </>
             )}
             <input type="hidden" name="source" value={file?.name ?? "Apuntes pegados"} />
@@ -110,7 +113,7 @@ export default function UploadPage() {
 
           <div className="my-6 flex items-center gap-4">
             <span className="h-px flex-1 bg-border" />
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">o pega texto</span>
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">{t('orPaste')}</span>
             <span className="h-px flex-1 bg-border" />
           </div>
 
@@ -118,7 +121,7 @@ export default function UploadPage() {
             name="text"
             value={text}
             onChange={(e) => { setText(e.target.value) }}
-            placeholder="Pega aquí tus apuntes de biología, historia, programación…"
+            placeholder={t('textareaPlaceholder')}
             className="min-h-40 w-full resize-y rounded-2xl border border-border bg-card/40 p-4 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60"
           />
 
@@ -132,7 +135,7 @@ export default function UploadPage() {
         </form>
 
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          Analizamos tus apuntes con IA para crear un mapa personalizado.
+          {t('aiNotice')}
         </p>
       </main>
     </div>

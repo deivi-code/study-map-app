@@ -1,0 +1,228 @@
+{
+  "landing": {
+    "badge": "Aprende como un sistema, no como una lista",
+    "hero": "Convierte tus apuntes en un",
+    "heroHighlight": "mapa de conocimiento",
+    "subtitle": "Sube tus apuntes y obtén un árbol interactivo de conceptos. Desbloquea nodos superando tests y descubre con exactitud qué dominas y qué te falta.",
+    "cta": "Subir apuntes",
+    "freeTag": "Sin registro · Gratis",
+    "porAprender": "Por aprender",
+    "enProgreso": "En progreso",
+    "dominado": "Dominado",
+    "featuresTitle": "Mucho mejor que releer apuntes",
+    "featuresSubtitle": "Un sistema de aprendizaje activo que te muestra el camino y te mantiene en marcha.",
+    "feature1Title": "Mapa visual del saber",
+    "feature1Desc": "Tus apuntes se convierten en un árbol de conceptos conectados, con un orden lógico de aprendizaje.",
+    "feature2Title": "Tests que se adaptan",
+    "feature2Desc": "Cada nodo incluye un mini test. Respondes, recibes feedback y avanzas desbloqueando nuevos temas.",
+    "feature3Title": "Sabes qué dominas",
+    "feature3Desc": "Cada concepto muestra tu nivel: por aprender, en progreso o dominado. Sin autoengaños.",
+    "feature4Title": "Progreso que motiva",
+    "feature4Desc": "Racha de estudio, porcentaje de dominio y mensajes de coach para mantener el ritmo.",
+    "step1Title": "Sube tus apuntes",
+    "step1Desc": "Arrastra un PDF o pega tu texto.",
+    "step2Title": "Generamos el mapa",
+    "step2Desc": "Detectamos conceptos y los conectamos.",
+    "step3Title": "Desbloquea y domina",
+    "step3Desc": "Supera tests y avanza por el árbol.",
+    "ctaSectionTitle": "Empieza a estudiar con claridad",
+    "ctaSectionDesc": "Sube tus apuntes y construye tu primer mapa de conocimiento en segundos.",
+    "ctaSectionBtn": "Subir apuntes",
+    "footer": "Study Map · Tu coach académico personal"
+  },
+  "brand": {
+    "themeLight": "Activar modo claro",
+    "themeDark": "Activar modo oscuro",
+    "userFallback": "Usuario",
+    "myItineraries": "Mis itinerarios",
+    "signOut": "Cerrar sesión",
+    "signIn": "Iniciar sesión",
+    "start": "Empezar"
+  },
+  "upload": {
+    "back": "Volver",
+    "title": "Sube tus apuntes",
+    "subtitle": "Arrastra un PDF o pega tu texto. Construiremos tu mapa de conocimiento.",
+    "dropPlaceholder": "Arrastra tu PDF aquí o",
+    "selectFile": "selecciona un archivo",
+    "fileLimit": "PDF, TXT, MD · máx. 5 MB",
+    "orPaste": "o pega texto",
+    "textareaPlaceholder": "Pega aquí tus apuntes de biología, historia, programación…",
+    "generating": "Generando…",
+    "generate": "Generar mapa",
+    "aiNotice": "Analizamos tus apuntes con IA para crear un mapa personalizado.",
+    "removeFile": "Quitar archivo"
+  },
+  "login": {
+    "checkEmail": "Revisa tu correo",
+    "sentLink": "Te hemos enviado un enlace de inicio de sesión a",
+    "spamHint": "Si no lo ves, revisa la bandeja de spam.",
+    "useOtherEmail": "Usar otro correo",
+    "title": "Iniciar sesión",
+    "subtitle": "Introduce tu correo para recibir un enlace o usa Google.",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@correo.com",
+    "sendLink": "Enviar enlace de acceso",
+    "orContinueWith": "O continúa con",
+    "google": "Google",
+    "backToHome": "Volver al inicio",
+    "errorSend": "Error al enviar el enlace. Intenta de nuevo."
+  },
+  "main": {
+    "map": "Mapa",
+    "progress": "Progreso",
+    "dashboardAria": "Ir al panel principal",
+    "newMap": "Nuevo mapa"
+  },
+  "skillTree": {
+    "searchPlaceholder": "Buscar concepto...",
+    "searchLabel": "Buscar concepto",
+    "graphAria": "Mapa de conocimiento. Arrastra para mover, rueda para zoom.",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "center": "Centrar",
+    "dragHint": "Arrastra para mover · rueda para zoom",
+    "requires": "Requiere"
+  },
+  "nodeDrawer": {
+    "close": "Cerrar",
+    "requirements": "Requisitos para desbloquear",
+    "progress": "Progreso del nodo",
+    "attempt": "intento",
+    "attempts": "intentos",
+    "explanation": "Explicación",
+    "examples": "Ejemplos",
+    "stepsLabel": "pasos en esta lección",
+    "theoryLabel": "teoría",
+    "questionsLabel": "preguntas",
+    "lockedMessage": "Desbloquea los requisitos para acceder",
+    "repeatLesson": "Repetir lección",
+    "startLesson": "Empezar lección"
+  },
+  "lesson": {
+    "exitTitle": "¿Salir de la lección?",
+    "exitDesc": "Se perderá el progreso de este nodo. Puedes volver a intentarlo después.",
+    "continue": "Continuar",
+    "exit": "Salir",
+    "exitAria": "Salir de la lección",
+    "progressAria": "Progreso de la lección",
+    "step": "Paso",
+    "theory": "Teoría",
+    "correct": "¡Correcto!",
+    "incorrect": "Incorrecto.",
+    "next": "Siguiente",
+    "hint": "Pista:",
+    "answerLabel": "Escribe tu respuesta",
+    "answerPlaceholder": "Escribe tu respuesta…",
+    "check": "Comprobar",
+    "aiReview": "Pedir revisión con IA",
+    "retryAnswer": "Reintentar respuesta",
+    "resultsCorrect": "aciertos",
+    "resultsNoQuestions": "Lección sin preguntas",
+    "backToMap": "Volver al mapa",
+    "repeatLesson": "Repetir lección"
+  },
+  "dashboard": {
+    "noMapTitle": "No hay mapa cargado",
+    "noMapDesc": "Selecciona un itinerario o crea uno nuevo para ver tu progreso.",
+    "uploadNotes": "Subir apuntes",
+    "coachHigh": "Vas como un crack. ¡Casi dominas todo el mapa!",
+    "coachMid": "Buen ritmo. Refuerza los nodos débiles para subir de nivel.",
+    "coachLow": "Acabas de empezar. Desbloquea nodos completando lecciones.",
+    "yourProgress": "Tu progreso",
+    "totalMastery": "dominio total",
+    "nodesMastered": "Nodos dominados",
+    "weakNodes": "Nodos débiles",
+    "studyStreak": "Racha de estudio",
+    "toExplore": "Por explorar",
+    "distribution": "Distribución de dominio",
+    "perConcept": "Dominio por concepto",
+    "reviewThese": "Repasa estos conceptos",
+    "lessons": "lecciones"
+  },
+  "dashboardPage": {
+    "title": "Panel de control",
+    "subtitle": "Tus mapas de estudio y progreso general.",
+    "whereYouLeft": "Donde lo dejaste",
+    "totalMastery": "Dominio total",
+    "nodesMastered": "Nodos dominados",
+    "weakNodes": "Débiles",
+    "streak": "Racha",
+    "continue": "Continuar",
+    "emptyTitle": "Aún no tienes itinerarios",
+    "emptyDesc": "Crea tu primer mapa de estudio desde la página de carga de apuntes.",
+    "uploadNotes": "Subir apuntes",
+    "myItineraries": "Mis itinerarios",
+    "openMap": "Abrir mapa",
+    "deleteMap": "Eliminar mapa",
+    "deleteConfirm": "¿Eliminar este itinerario? Esta acción no se puede deshacer.",
+    "deleteError": "Error al eliminar el mapa",
+    "mapsCount": "mapa(s) guardado(s)"
+  },
+  "itinerary": {
+    "loadError": "Error al cargar los mapas",
+    "unknownError": "Error desconocido",
+    "deleteConfirm": "¿Eliminar este itinerario? Esta acción no se puede deshacer.",
+    "deleteError": "Error al eliminar el mapa",
+    "title": "Mis itinerarios",
+    "mapsCount": "mapa(s) guardado(s)",
+    "loading": "Cargando itinerarios...",
+    "retry": "Reintentar",
+    "emptyTitle": "Aún no tienes itinerarios",
+    "emptyDesc": "Crea tu primer mapa de estudio desde la página de inicio.",
+    "nodes": "nodos",
+    "openMap": "Abrir mapa",
+    "deleteMap": "Eliminar mapa",
+    "footerHint": "Haz clic en un mapa para abrirlo"
+  },
+  "onboarding": {
+    "step1Title": "Bienvenido a Mapa de Estudio",
+    "step1Text": "Convierte tus apuntes en un árbol de conocimiento interactivo.",
+    "step2Title": "Sube tus apuntes",
+    "step2Text": "Pega texto o sube un archivo para generar un mapa conceptual.",
+    "step3Title": "Aprende paso a paso",
+    "step3Text": "Cada nodo tiene una lección con teoría y preguntas para evaluar tu comprensión.",
+    "step4Title": "Sigue tu progreso",
+    "step4Text": "Los colores te indican tu dominio: verde (alto), ámbar (medio), rojo (bajo).",
+    "closeAria": "Cerrar tutorial",
+    "skip": "Saltar",
+    "next": "Siguiente",
+    "start": "¡Empezar!"
+  },
+  "error": {
+    "message": "Algo salió mal.",
+    "retry": "Intentar de nuevo"
+  },
+  "exportImport": {
+    "exportAria": "Exportar mapa",
+    "importAria": "Importar mapa"
+  },
+  "mastery": {
+    "locked": {
+      "label": "Bloqueado",
+      "coach": "Domina los temas previos para desbloquear."
+    },
+    "red": {
+      "label": "Por aprender",
+      "coach": "Empieza por aquí, aún no lo dominas."
+    },
+    "amber": {
+      "label": "En progreso",
+      "coach": "Bien, pero puedes mejorar. Repite la lección."
+    },
+    "green": {
+      "label": "Dominado",
+      "coach": "Dominado. ¡Buen trabajo!"
+    }
+  },
+  "study": {
+    "loader1": "Analizando apuntes…",
+    "loader2": "Detectando conceptos clave…",
+    "loader3": "Construyendo mapa de conocimiento…",
+    "loader4": "Creando rutas de aprendizaje…",
+    "loader5": "Generando lecciones adaptativas…"
+  },
+  "locale": {
+    "switchTo": "English"
+  }
+}

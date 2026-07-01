@@ -9,6 +9,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { ItineraryList } from "./itinerary-list"
 import { AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 export function Logo({ className }: { className?: string }) {
   return (
@@ -25,11 +26,12 @@ export function Logo({ className }: { className?: string }) {
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, toggleTheme } = useTheme()
+  const t = useTranslations("brand")
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}
+      aria-label={theme === "dark" ? t("themeLight") : t("themeDark")}
       className={cn(
         "grid size-9 place-items-center rounded-lg border border-border bg-card/60 text-muted-foreground transition-colors hover:text-foreground hover:bg-accent",
         className,
@@ -42,6 +44,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
 export function AuthButton({ className }: { className?: string }) {
   const { user, isLoadingUser } = useAuth()
+  const t = useTranslations("brand")
   const [showMenu, setShowMenu] = useState(false)
   const [showItineraryList, setShowItineraryList] = useState(false)
 
@@ -75,7 +78,7 @@ export function AuthButton({ className }: { className?: string }) {
               )}
             >
               <User className="h-4 w-4" />
-              <span className="hidden sm:inline">{user.name || "Usuario"}</span>
+              <span className="hidden sm:inline">{user.name || t("userFallback")}</span>
             </button>
             {showMenu && (
               <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-card p-2 shadow-lg">
@@ -87,7 +90,7 @@ export function AuthButton({ className }: { className?: string }) {
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
                 >
                   <Map className="h-4 w-4" />
-                  Mis itinerarios
+                  {t("myItineraries")}
                 </button>
                 <div className="my-1 border-t border-border" />
                 <button
@@ -98,7 +101,7 @@ export function AuthButton({ className }: { className?: string }) {
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
                 >
                   <LogOut className="h-4 w-4" />
-                  Cerrar sesión
+                  {t("signOut")}
                 </button>
               </div>
             )}
@@ -113,7 +116,7 @@ export function AuthButton({ className }: { className?: string }) {
               )}
             >
               <Map className="h-4 w-4" />
-              <span className="hidden sm:inline">Mis itinerarios</span>
+              <span className="hidden sm:inline">{t("myItineraries")}</span>
             </button>
             <Link
               href="/login"
@@ -123,7 +126,7 @@ export function AuthButton({ className }: { className?: string }) {
               )}
             >
               <LogIn className="h-4 w-4" />
-              <span className="hidden sm:inline">Iniciar sesión</span>
+              <span className="hidden sm:inline">{t("signIn")}</span>
             </Link>
           </>
         )}

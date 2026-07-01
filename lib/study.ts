@@ -164,6 +164,17 @@ export const masteryMeta: Record<
   green: { label: "Dominado", color: "var(--mastery-green)", coach: "Dominado. ¡Buen trabajo!" },
 }
 
+export function masteryMetaT(
+  t: (key: string) => string,
+  m: Mastery,
+): { label: string; color: string; coach: string } {
+  return {
+    color: masteryMeta[m].color,
+    label: t(`mastery.${m}.label`),
+    coach: t(`mastery.${m}.coach`),
+  }
+}
+
 export const loaderSteps = [
   "Analizando apuntes…",
   "Detectando conceptos clave…",
@@ -171,3 +182,7 @@ export const loaderSteps = [
   "Creando rutas de aprendizaje…",
   "Generando lecciones adaptativas…",
 ]
+
+export function loaderStepsT(t: (key: string) => string): string[] {
+  return [1, 2, 3, 4, 5].map((i) => t(`study.loader${i}`))
+}

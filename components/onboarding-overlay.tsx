@@ -3,17 +3,14 @@
 import { useState, useEffect } from "react"
 import { X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from 'next-intl'
 
 const STORAGE_KEY = "studymap:onboarding"
 
-const steps = [
-  { title: "Bienvenido a Mapa de Estudio", text: "Convierte tus apuntes en un árbol de conocimiento interactivo." },
-  { title: "Sube tus apuntes", text: "Pega texto o sube un archivo para generar un mapa conceptual." },
-  { title: "Aprende paso a paso", text: "Cada nodo tiene una lección con teoría y preguntas para evaluar tu comprensión." },
-  { title: "Sigue tu progreso", text: "Los colores te indican tu dominio: verde (alto), ámbar (medio), rojo (bajo)." },
-]
+const stepKeys = ['step1', 'step2', 'step3', 'step4']
 
 export function OnboardingOverlay() {
+  const t = useTranslations('onboarding')
   const [visible, setVisible] = useState(false)
   const [step, setStep] = useState(0)
 
@@ -49,14 +46,14 @@ export function OnboardingOverlay() {
               type="button"
               onClick={dismiss}
               className="absolute right-3 top-3 rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-              aria-label="Cerrar tutorial"
+              aria-label={t('closeAria')}
             >
               <X className="size-4" />
             </button>
 
             <div className="mb-6 mt-2">
               <div className="flex gap-1.5 mb-4">
-                {steps.map((_, i) => (
+                {stepKeys.map((_, i) => (
                   <span
                     key={i}
                     className={`h-1.5 flex-1 rounded-full transition-colors ${
@@ -65,8 +62,8 @@ export function OnboardingOverlay() {
                   />
                 ))}
               </div>
-              <h2 className="text-lg font-semibold mb-2">{steps[step].title}</h2>
-              <p className="text-sm text-muted-foreground">{steps[step].text}</p>
+              <h2 className="text-lg font-semibold mb-2">{t(`${stepKeys[step]}Title`)}</h2>
+              <p className="text-sm text-muted-foreground">{t(`${stepKeys[step]}Text`)}</p>
             </div>
 
             <div className="flex justify-between gap-3">
@@ -75,17 +72,17 @@ export function OnboardingOverlay() {
                 onClick={dismiss}
                 className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
-                Saltar
+                {t('skip')}
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  if (step < steps.length - 1) setStep(step + 1)
+                  if (step < stepKeys.length - 1) setStep(step + 1)
                   else dismiss()
                 }}
                 className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
               >
-                {step < steps.length - 1 ? "Siguiente" : "¡Empezar!"}
+                {step < stepKeys.length - 1 ? t('next') : t('start')}
               </button>
             </div>
           </motion.div>

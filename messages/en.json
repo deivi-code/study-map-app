@@ -1,0 +1,228 @@
+{
+  "landing": {
+    "badge": "Learn like a system, not a list",
+    "hero": "Turn your notes into an",
+    "heroHighlight": "interactive knowledge map",
+    "subtitle": "Upload your notes and get an interactive concept tree. Unlock nodes by passing tests and discover exactly what you know and what you need to review.",
+    "cta": "Upload notes",
+    "freeTag": "No sign up · Free",
+    "porAprender": "To learn",
+    "enProgreso": "In progress",
+    "dominado": "Mastered",
+    "featuresTitle": "Much better than rereading notes",
+    "featuresSubtitle": "An active learning system that shows you the path and keeps you going.",
+    "feature1Title": "Visual knowledge map",
+    "feature1Desc": "Your notes become a tree of connected concepts with a logical learning order.",
+    "feature2Title": "Adaptive tests",
+    "feature2Desc": "Each node includes a mini test. Answer, get feedback, and unlock new topics.",
+    "feature3Title": "Know what you master",
+    "feature3Desc": "Each concept shows your level: to learn, in progress, or mastered. No self-deception.",
+    "feature4Title": "Progress that motivates",
+    "feature4Desc": "Study streak, mastery percentage, and coach messages to keep you on track.",
+    "step1Title": "Upload your notes",
+    "step1Desc": "Drag a PDF or paste your text.",
+    "step2Title": "Generate the map",
+    "step2Desc": "We detect concepts and connect them.",
+    "step3Title": "Unlock & master",
+    "step3Desc": "Pass tests and advance through the tree.",
+    "ctaSectionTitle": "Start studying with clarity",
+    "ctaSectionDesc": "Upload your notes and build your first knowledge map in seconds.",
+    "ctaSectionBtn": "Upload notes",
+    "footer": "Study Map · Your personal academic coach"
+  },
+  "brand": {
+    "themeLight": "Switch to light mode",
+    "themeDark": "Switch to dark mode",
+    "userFallback": "User",
+    "myItineraries": "My itineraries",
+    "signOut": "Sign out",
+    "signIn": "Sign in",
+    "start": "Get started"
+  },
+  "upload": {
+    "back": "Back",
+    "title": "Upload your notes",
+    "subtitle": "Drag a PDF or paste your text. We'll build your knowledge map.",
+    "dropPlaceholder": "Drag your PDF here or",
+    "selectFile": "select a file",
+    "fileLimit": "PDF, TXT, MD · max 5 MB",
+    "orPaste": "or paste text",
+    "textareaPlaceholder": "Paste your biology, history, programming notes here…",
+    "generating": "Generating…",
+    "generate": "Generate map",
+    "aiNotice": "We analyze your notes with AI to create a personalized map.",
+    "removeFile": "Remove file"
+  },
+  "login": {
+    "checkEmail": "Check your email",
+    "sentLink": "We've sent a sign-in link to",
+    "spamHint": "If you don't see it, check your spam folder.",
+    "useOtherEmail": "Use another email",
+    "title": "Sign in",
+    "subtitle": "Enter your email to receive a magic link or use Google.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@email.com",
+    "sendLink": "Send magic link",
+    "orContinueWith": "Or continue with",
+    "google": "Google",
+    "backToHome": "Back to home",
+    "errorSend": "Failed to send the link. Please try again."
+  },
+  "main": {
+    "map": "Map",
+    "progress": "Progress",
+    "dashboardAria": "Go to dashboard",
+    "newMap": "New map"
+  },
+  "skillTree": {
+    "searchPlaceholder": "Search concept...",
+    "searchLabel": "Search concept",
+    "graphAria": "Knowledge map. Drag to pan, scroll to zoom.",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "center": "Center",
+    "dragHint": "Drag to pan · scroll to zoom",
+    "requires": "Requires"
+  },
+  "nodeDrawer": {
+    "close": "Close",
+    "requirements": "Requirements to unlock",
+    "progress": "Node progress",
+    "attempt": "attempt",
+    "attempts": "attempts",
+    "explanation": "Explanation",
+    "examples": "Examples",
+    "stepsLabel": "steps in this lesson",
+    "theoryLabel": "theory",
+    "questionsLabel": "questions",
+    "lockedMessage": "Unlock the requirements to access",
+    "repeatLesson": "Repeat lesson",
+    "startLesson": "Start lesson"
+  },
+  "lesson": {
+    "exitTitle": "Leave the lesson?",
+    "exitDesc": "Progress for this node will be lost. You can try again later.",
+    "continue": "Continue",
+    "exit": "Leave",
+    "exitAria": "Leave lesson",
+    "progressAria": "Lesson progress",
+    "step": "Step",
+    "theory": "Theory",
+    "correct": "Correct!",
+    "incorrect": "Incorrect.",
+    "next": "Next",
+    "hint": "Hint:",
+    "answerLabel": "Write your answer",
+    "answerPlaceholder": "Write your answer…",
+    "check": "Check",
+    "aiReview": "Request AI review",
+    "retryAnswer": "Retry answer",
+    "resultsCorrect": "correct",
+    "resultsNoQuestions": "Lesson without questions",
+    "backToMap": "Back to map",
+    "repeatLesson": "Repeat lesson"
+  },
+  "dashboard": {
+    "noMapTitle": "No map loaded",
+    "noMapDesc": "Select an itinerary or create a new one to see your progress.",
+    "uploadNotes": "Upload notes",
+    "coachHigh": "You're on fire! Almost the entire map is mastered.",
+    "coachMid": "Good pace. Strengthen weak nodes to level up.",
+    "coachLow": "You've just started. Unlock nodes by completing lessons.",
+    "yourProgress": "Your progress",
+    "totalMastery": "total mastery",
+    "nodesMastered": "Nodes mastered",
+    "weakNodes": "Weak nodes",
+    "studyStreak": "Study streak",
+    "toExplore": "To explore",
+    "distribution": "Mastery distribution",
+    "perConcept": "Mastery by concept",
+    "reviewThese": "Review these concepts",
+    "lessons": "lessons"
+  },
+  "dashboardPage": {
+    "title": "Dashboard",
+    "subtitle": "Your study maps and overall progress.",
+    "whereYouLeft": "Where you left off",
+    "totalMastery": "Total mastery",
+    "nodesMastered": "Nodes mastered",
+    "weakNodes": "Weak",
+    "streak": "Streak",
+    "continue": "Continue",
+    "emptyTitle": "No itineraries yet",
+    "emptyDesc": "Create your first study map from the upload page.",
+    "uploadNotes": "Upload notes",
+    "myItineraries": "My itineraries",
+    "openMap": "Open map",
+    "deleteMap": "Delete map",
+    "deleteConfirm": "Delete this itinerary? This action cannot be undone.",
+    "deleteError": "Error deleting map",
+    "mapsCount": "map(s) saved"
+  },
+  "itinerary": {
+    "loadError": "Error loading maps",
+    "unknownError": "Unknown error",
+    "deleteConfirm": "Delete this itinerary? This action cannot be undone.",
+    "deleteError": "Error deleting map",
+    "title": "My itineraries",
+    "mapsCount": "map(s) saved",
+    "loading": "Loading itineraries...",
+    "retry": "Retry",
+    "emptyTitle": "No itineraries yet",
+    "emptyDesc": "Create your first study map from the home page.",
+    "nodes": "nodes",
+    "openMap": "Open map",
+    "deleteMap": "Delete map",
+    "footerHint": "Click a map to open it"
+  },
+  "onboarding": {
+    "step1Title": "Welcome to Study Map",
+    "step1Text": "Turn your notes into an interactive knowledge tree.",
+    "step2Title": "Upload your notes",
+    "step2Text": "Paste text or upload a file to generate a concept map.",
+    "step3Title": "Learn step by step",
+    "step3Text": "Each node has a lesson with theory and questions to assess your understanding.",
+    "step4Title": "Track your progress",
+    "step4Text": "Colors show your mastery: green (high), amber (medium), red (low).",
+    "closeAria": "Close tutorial",
+    "skip": "Skip",
+    "next": "Next",
+    "start": "Let's start!"
+  },
+  "error": {
+    "message": "Something went wrong.",
+    "retry": "Try again"
+  },
+  "exportImport": {
+    "exportAria": "Export map",
+    "importAria": "Import map"
+  },
+  "mastery": {
+    "locked": {
+      "label": "Locked",
+      "coach": "Master the prerequisites to unlock."
+    },
+    "red": {
+      "label": "To learn",
+      "coach": "Start here, you don't master it yet."
+    },
+    "amber": {
+      "label": "In progress",
+      "coach": "Good, but you can improve. Repeat the lesson."
+    },
+    "green": {
+      "label": "Mastered",
+      "coach": "Mastered. Great job!"
+    }
+  },
+  "study": {
+    "loader1": "Analyzing notes…",
+    "loader2": "Detecting key concepts…",
+    "loader3": "Building knowledge map…",
+    "loader4": "Creating learning paths…",
+    "loader5": "Generating adaptive lessons…"
+  },
+  "locale": {
+    "switchTo": "Español"
+  }
+}

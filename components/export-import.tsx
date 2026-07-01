@@ -3,8 +3,10 @@
 import { useRef, useContext } from "react"
 import { Download, Upload } from "lucide-react"
 import { StudyContext } from "@/lib/store"
+import { useTranslations } from 'next-intl'
 
 export function ExportImport() {
+  const t = useTranslations('exportImport')
   const ctx = useContext(StudyContext)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -48,7 +50,7 @@ export function ExportImport() {
         type="button"
         onClick={handleExport}
         className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-        aria-label="Exportar mapa"
+        aria-label={t('exportAria')}
       >
         <Download className="size-4" />
       </button>
@@ -56,7 +58,7 @@ export function ExportImport() {
         type="button"
         onClick={() => inputRef.current?.click()}
         className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-        aria-label="Importar mapa"
+        aria-label={t('importAria')}
       >
         <Upload className="size-4" />
       </button>

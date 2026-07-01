@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from 'next-intl'
 import { authClient } from "@/lib/auth-client"
 import { Mail, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState("")
+  const t = useTranslations('login')
 
   async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault()
@@ -20,7 +22,7 @@ export default function LoginPage() {
       await authClient.signIn.magicLink({ email, callbackURL: "/" })
       setSent(true)
     } catch {
-      setError("Error al enviar el enlace. Intenta de nuevo.")
+      setError(t('errorSend'))
     } finally {
       setLoading(false)
     }
@@ -38,17 +40,17 @@ export default function LoginPage() {
           <div className="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-primary/12">
             <Mail className="size-6 text-primary" />
           </div>
-          <h1 className="text-lg font-semibold">Revisa tu correo</h1>
+          <h1 className="text-lg font-semibold">{t('checkEmail')}</h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Te hemos enviado un enlace de inicio de sesión a <strong className="text-foreground">{email}</strong>.
+            {t('sentLink')} <strong className="text-foreground">{email}</strong>.
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Si no lo ves, revisa la bandeja de spam.</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t('spamHint')}</p>
           <button
             onClick={() => setSent(false)}
             className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="size-3.5" />
-            Usar otro correo
+            {t('useOtherEmail')}
           </button>
         </div>
       </div>
@@ -68,19 +70,19 @@ export default function LoginPage() {
             </svg>
           </div>
 
-          <h1 className="text-center text-xl font-semibold">Iniciar sesión</h1>
+          <h1 className="text-center text-xl font-semibold">{t('title')}</h1>
           <p className="mt-1 text-center text-sm text-muted-foreground">
-            Introduce tu correo para recibir un enlace o usa Google.
+            {t('subtitle')}
           </p>
 
           <form onSubmit={handleMagicLink} className="mt-6 space-y-4">
             <div>
-              <label htmlFor="email" className="sr-only">Correo electrónico</label>
+              <label htmlFor="email" className="sr-only">{t('emailLabel')}</label>
               <input
                 id="email"
                 type="email"
                 required
-                placeholder="tu@correo.com"
+                placeholder={t('emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
@@ -101,7 +103,7 @@ export default function LoginPage() {
               ) : (
                 <Mail className="size-4" />
               )}
-              Enviar enlace de acceso
+              {t('sendLink')}
             </button>
           </form>
 
@@ -110,7 +112,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card/60 px-2 text-muted-foreground">O continúa con</span>
+              <span className="bg-card/60 px-2 text-muted-foreground">{t('orContinueWith')}</span>
             </div>
           </div>
 
@@ -129,12 +131,12 @@ export default function LoginPage() {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
             )}
-            Google
+            {t('google')}
           </button>
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          <Link href="/" className="hover:text-foreground transition-colors">Volver al inicio</Link>
+          <Link href="/" className="hover:text-foreground transition-colors">{t('backToHome')}</Link>
         </p>
       </div>
     </div>

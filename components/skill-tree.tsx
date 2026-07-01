@@ -6,12 +6,14 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useStudy } from "@/lib/store"
 import { getMastery, layoutNodes, masteryMeta, type PositionedNode } from "@/lib/study"
 import type { Mastery, ProgressMap } from "@/lib/types"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { LoadingSkeleton } from "./loading-skeleton"
 
 const NODE = 76
 
 export function SkillTree() {
+  const t = useTranslations("skillTree")
   const { map, progress, openNode } = useStudy()
   const [search, setSearch] = useState("")
   const { positioned, width, height } = useMemo(
@@ -34,9 +36,9 @@ export function SkillTree() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar concepto..."
+          placeholder={t('searchPlaceholder')}
           className="mx-auto mb-2 mt-4 block w-[90%] max-w-sm rounded-lg border border-border bg-card/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 lg:hidden"
-          aria-label="Buscar concepto"
+          aria-label={t('searchLabel')}
         />
       </div>
       <div className="hidden lg:block">
@@ -67,6 +69,7 @@ function GraphView({
     parentMap.set(n.id, n)
   }
   const containerRef = useRef<HTMLDivElement>(null)
+  const tr = useTranslations("skillTree")
   const [t, setT] = useState({ x: 0, y: 0, s: 0.85 })
   const drag = useRef<{ active: boolean; sx: number; sy: number; ox: number; oy: number }>({
     active: false,
@@ -125,7 +128,7 @@ function GraphView({
       onPointerLeave={() => (drag.current.active = false)}
       style={{ cursor: drag.current.active ? "grabbing" : "grab" }}
       role="application"
-      aria-label="Mapa de conocimiento. Arrastra para mover, rueda para zoom."
+      aria-label={tr('graphAria')}
       tabIndex={0}
     >
       <div
@@ -184,19 +187,19 @@ function GraphView({
       </div>
 
       <div className="absolute bottom-5 right-5 flex flex-col gap-1.5 rounded-xl border border-border bg-card/80 p-1.5 backdrop-blur">
-        <ZoomBtn label="Acercar" onClick={() => setT((p) => ({ ...p, s: Math.min(1.8, p.s + 0.15) }))}>
+        <ZoomBtn label={tr('zoomIn')} onClick={() => setT((p) => ({ ...p, s: Math.min(1.8, p.s + 0.15) }))}>
           <Plus className="size-4" />
         </ZoomBtn>
-        <ZoomBtn label="Alejar" onClick={() => setT((p) => ({ ...p, s: Math.max(0.4, p.s - 0.15) }))}>
+        <ZoomBtn label={tr('zoomOut')} onClick={() => setT((p) => ({ ...p, s: Math.max(0.4, p.s - 0.15) }))}>
           <Minus className="size-4" />
         </ZoomBtn>
-        <ZoomBtn label="Centrar" onClick={center}>
+        <ZoomBtn label={tr('center')} onClick={center}>
           <Maximize className="size-4" />
         </ZoomBtn>
       </div>
 
       <p className="pointer-events-none absolute bottom-5 left-5 text-xs text-muted-foreground">
-        Arrastra para mover · rueda para zoom
+        {tr('dragHint')}
       </p>
     </div>
   )
@@ -325,6 +328,7 @@ function ListView({
   map: { nodes: { id: string; title: string }[] }
   onOpen: (id: string) => void
 }) {
+  const t = useTranslations("skillTree")
   const ordered = [...positioned].sort((a, b) => a.level - b.level)
   return (
     <div className="mx-auto max-w-lg space-y-3 px-4 py-6">
@@ -349,7 +353,7 @@ function ListView({
               "flex w-full items-center gap-3.5 rounded-2xl border border-border bg-card/60 p-3.5 text-left transition-colors",
               locked ? "opacity-60" : "hover:border-primary/40",
             )}
-            aria-label={`${node.title} - ${meta.label}${deps.length > 0 ? `. Requiere: ${deps.map((d) => d?.title).join(", ")}` : ""}`}
+            aria-label={`${node.title} - ${meta.label}${deps.length > 0 ? `. ${t('requires')}${deps.map((d) => d?.title).join(", ")}` : ""}`}
           >
             <span
               className="grid size-11 shrink-0 place-items-center rounded-full text-xs font-semibold"
@@ -368,7 +372,7 @@ function ListView({
               </span>
               {deps.length > 0 && (
                 <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
-                  Requiere: {deps.map((d) => d?.title).join(", ")}
+                  {t('requires')}{deps.map((d) => d?.title).join(", ")}
                 </span>
               )}
             </span>
