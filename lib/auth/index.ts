@@ -43,7 +43,7 @@ export const auth = betterAuth({
         to: user.email,
         subject: "Verifica tu correo electrónico",
         html: `
-          <h1>Bienvenido a Mapa de Estudio</h1>
+          <h1>Bienvenido a Study Map</h1>
           <p>Haz clic en el siguiente enlace para verificar tu correo:</p>
           <a href="${url}">${url}</a>
         `,
@@ -65,7 +65,7 @@ export const auth = betterAuth({
         to: email,
         subject: "Enlace mágico para iniciar sesión",
         html: `
-          <h1>Inicia sesión en Mapa de Estudio</h1>
+          <h1>Inicia sesión en Study Map</h1>
           <p>Haz clic en el siguiente enlace para iniciar sesión:</p>
           <a href="${url}">${url}</a>
           <p>Este enlace expirará en 24 horas.</p>

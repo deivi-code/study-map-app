@@ -12,20 +12,12 @@ import { AnimatePresence } from "framer-motion"
 export function Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
-      <span className="grid size-8 place-items-center rounded-lg bg-primary/15 ring-1 ring-primary/30">
-        <svg viewBox="0 0 24 24" className="size-5 text-primary" aria-hidden="true">
-          <circle cx="12" cy="5" r="2.4" fill="currentColor" />
-          <circle cx="5.5" cy="17" r="2.4" fill="currentColor" opacity="0.65" />
-          <circle cx="18.5" cy="17" r="2.4" fill="currentColor" opacity="0.65" />
-          <path
-            d="M12 7.4 6.6 14.8M12 7.4l5.4 7.4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </span>
-      <span className="text-[15px] font-semibold tracking-tight">Mapa de Estudio</span>
+      <svg viewBox="0 0 24 24" className="size-7 text-primary" aria-hidden="true">
+        <circle cx="12" cy="5" r="2.4" fill="currentColor" />
+        <circle cx="5.5" cy="17" r="2.4" fill="currentColor" opacity="0.65" />
+        <circle cx="18.5" cy="17" r="2.4" fill="currentColor" opacity="0.65" />
+        <path d="M12 7.4 6.6 14.8M12 7.4l5.4 7.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
     </div>
   )
 }

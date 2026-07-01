@@ -11,12 +11,32 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
+const APP_NAME = 'Study Map'
+const APP_DESCRIPTION =
+  'Transforma tus apuntes en un árbol de conocimiento interactivo. Aprende activamente con tests, visualiza tu progreso y descubre exactamente qué dominas.'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://estudio-mapa.vercel.app'
+
 export const metadata: Metadata = {
-  title: 'Mapa de Estudio — Convierte tus apuntes en conocimiento',
-  description:
-    'Transforma tus apuntes en un mapa interactivo de conocimiento. Avanza desbloqueando conceptos con tests y descubre exactamente qué dominas.',
+  title: {
+    default: `${APP_NAME} — Domina lo que estudias con mapas interactivos`,
+    template: `%s — ${APP_NAME}`,
+  },
+  description: APP_DESCRIPTION,
   generator: 'v0.app',
   manifest: '/manifest.json',
+  applicationName: APP_NAME,
+  category: 'education',
+  keywords: [
+    'mapa de estudio',
+    'mapa conceptual',
+    'aprendizaje activo',
+    'organizador de estudio',
+    'árbol de conocimiento',
+    'tests de estudio',
+    'apuntes online',
+    'progreso académico',
+  ],
+  authors: [{ name: 'Study Map' }],
   icons: {
     icon: [
       {
@@ -33,6 +53,33 @@ export const metadata: Metadata = {
       },
     ],
     apple: '/apple-icon.png',
+  },
+  openGraph: {
+    title: `${APP_NAME} — Domina lo que estudias con mapas interactivos`,
+    description: APP_DESCRIPTION,
+    url: APP_URL,
+    siteName: APP_NAME,
+    locale: 'es_ES',
+    type: 'website',
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: APP_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${APP_NAME} — Domina lo que estudias con mapas interactivos`,
+    description: APP_DESCRIPTION,
+    images: ['/opengraph-image.png'],
+    creator: '@estudiomapa',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 

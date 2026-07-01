@@ -1,11 +1,10 @@
-import type { Metadata } from "next"
+"use client"
+
 import { Map, ChartBar as BarChart3, Plus } from "lucide-react"
-import { ExportImport } from "@/components/export-import"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Logo, ThemeToggle, AuthButton } from "@/components/brand"
-import { ErrorBoundary } from "@/components/error-boundary"
 
 function NavButton({
   active,
@@ -63,40 +62,31 @@ function AppNav() {
   )
 }
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-}
-
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export function MainLayoutClient({ children }: { children: React.ReactNode }) {
   return (
-    <ErrorBoundary>
-      <div className="flex min-h-dvh flex-col">
-        <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <div className="flex items-center gap-4">
-              <Link href="/dashboard" aria-label="Ir al panel principal">
-                <Logo />
-              </Link>
-              <AppNav />
-            </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href="/upload"
-                className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:border-border/60"
-                aria-label="Nuevo mapa"
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Nuevo mapa</span>
-              </Link>
-              <ExportImport />
-              <AuthButton />
-              <ThemeToggle />
-            </div>
+    <div className="flex min-h-dvh flex-col">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" aria-label="Ir al panel principal">
+              <Logo />
+            </Link>
+            <AppNav />
           </div>
-        </header>
-        <div className="flex-1">{children}</div>
-      </div>
-    </ErrorBoundary>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/upload"
+              className="hidden items-center gap-1.5 rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:flex"
+            >
+              <Plus className="h-4 w-4" />
+              Nuevo mapa
+            </Link>
+            <AuthButton />
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+      <div className="flex-1">{children}</div>
+    </div>
   )
-}
 }
