@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Logo, ThemeToggle, AuthButton } from "@/components/brand"
+import { ExportImport } from "@/components/export-import"
 
 function NavButton({
   active,
@@ -81,6 +82,7 @@ export function MainLayoutClient({ children }: { children: React.ReactNode }) {
               <Plus className="h-4 w-4" />
               Nuevo mapa
             </Link>
+            <ExportImport />
             <AuthButton />
             <ThemeToggle />
           </div>
