@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation"
 import { Logo, ThemeToggle, AuthButton } from "@/components/brand"
 import { ExportImport } from "@/components/export-import"
 import { LocaleFooter } from "@/components/locale-footer"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 function NavButton({
   active,
@@ -45,6 +45,7 @@ function NavButton({
 function AppNav() {
   const pathname = usePathname()
   const t = useTranslations("main")
+  const locale = useLocale()
   // pathname: /en/app/abc123 or /es/app/abc123 or /app/abc123
   const match = pathname.match(/\/(?:en|es)?\/?app\/([^/]+)/) ?? pathname.match(/\/app\/([^/]+)/)
   const mapId = match?.[1]
@@ -56,10 +57,10 @@ function AppNav() {
 
   return (
     <nav className="flex items-center gap-1 rounded-xl border border-border/60 bg-card/60 p-1">
-      <NavButton active={isTree} href={`/app/${mapId}`} icon={<Map className="h-4 w-4" />} label={t("map")} />
+      <NavButton active={isTree} href={`/${locale}/app/${mapId}`} icon={<Map className="h-4 w-4" />} label={t("map")} />
       <NavButton
         active={isDashboard}
-        href={`/app/${mapId}/dashboard`}
+        href={`/${locale}/app/${mapId}/dashboard`}
         icon={<BarChart3 className="h-4 w-4" />}
         label={t("progress")}
       />

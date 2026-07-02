@@ -85,7 +85,7 @@ export function DashboardClient({
             </div>
             <div className="flex items-end">
               <Link
-                href={`/app/${latestSnapshot.mapId}`}
+                href={`/${locale}/app/${latestSnapshot.mapId}`}
                 className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.02]"
               >
                 {t('continue')}
@@ -110,7 +110,7 @@ export function DashboardClient({
             {t('emptyDesc')}
           </p>
           <Link
-            href="/upload"
+            href={`/${locale}/upload`}
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.02]"
           >
             {t('uploadNotes')}
@@ -146,7 +146,7 @@ export function DashboardClient({
               >
                 <div className="flex items-start justify-between">
                   <Link
-                    href={`/app/${map.id}`}
+                    href={`/${locale}/app/${map.id}`}
                     className="flex-1"
                   >
                     <h3 className="font-medium leading-tight">{map.title}</h3>
@@ -168,7 +168,7 @@ export function DashboardClient({
                   </Link>
                   <div className="ml-3 flex items-center gap-1">
                     <Link
-                      href={`/app/${map.id}`}
+                      href={`/${locale}/app/${map.id}`}
                       className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary"
                       title={t('openMap')}
                     >

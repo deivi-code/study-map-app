@@ -4,7 +4,7 @@ import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
 import { Check, Lightbulb, Lock, Play, RotateCcw, X } from "lucide-react"
 import { useEffect, useRef } from "react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { lessonStepSummary } from "@/lib/lesson"
 import { useStudy } from "@/lib/store"
 import { getMastery, masteryMeta } from "@/lib/study"
@@ -14,6 +14,8 @@ export function NodeDrawer() {
   const node = map?.nodes.find((n) => n.id === activeNodeId) ?? null
   const drawerRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const locale = useLocale()
+  const t = useTranslations("nodeDrawer")
 
   useEffect(() => {
     if (activeNodeId) {
@@ -73,7 +75,6 @@ export function NodeDrawer() {
             aria-label={node.title}
           >
             {(() => {
-              const t = useTranslations("nodeDrawer")
               const m = getMastery(node.id, node, progress)
               const meta = masteryMeta[m]
               const p = progress[node.id]
@@ -198,7 +199,7 @@ export function NodeDrawer() {
                       </div>
                     ) : (
                       <Link
-                        href={`/app/${map!.id}/lesson/${node.id}`}
+                        href={`/${locale}/app/${map!.id}/lesson/${node.id}`}
                         className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-[1.01]"
                       >
                         {p ? <RotateCcw className="size-4" /> : <Play className="size-4" />}

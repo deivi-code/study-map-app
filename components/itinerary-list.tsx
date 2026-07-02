@@ -55,7 +55,7 @@ export function ItineraryList({ onClose }: ItineraryListProps) {
 
   const handleSelectMap = (mapId: string) => {
     setLoadingId(mapId)
-    router.push(`/app/${mapId}`)
+    router.push(`/${locale}/app/${mapId}`)
     onClose()
   }
 

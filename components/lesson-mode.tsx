@@ -11,7 +11,7 @@ import { recordLessonAction } from "@/lib/actions/record-lesson"
 import { validateAnswerAction } from "@/lib/actions/validate-answer"
 import { masteryFromScore, masteryMeta } from "@/lib/study"
 import type { ChoiceStep, TextStep, TheoryStep } from "@/lib/types"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { cn } from "@/lib/utils"
 
 export function LessonMode({ onClose: externalClose, mapId }: { onClose?: () => void; mapId?: string }) {
@@ -37,6 +37,7 @@ export function LessonMode({ onClose: externalClose, mapId }: { onClose?: () => 
 
 function ConfirmDialog({ onConfirm, onCancel, mapId }: { onConfirm: () => void; onCancel: () => void; mapId?: string }) {
   const t = useTranslations("lesson")
+  const locale = useLocale()
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -60,7 +61,7 @@ function ConfirmDialog({ onConfirm, onCancel, mapId }: { onConfirm: () => void; 
             {t('continue')}
           </button>
           <Link
-            href={`/app/${mapId}`}
+            href={`/${locale}/app/${mapId}`}
             onClick={onConfirm}
             className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:opacity-90"
           >
@@ -498,6 +499,7 @@ function TextStepView({
 }
 
 function Results({
+
   node,
   score,
   correct,
@@ -517,6 +519,7 @@ function Results({
   mapId?: string
 }) {
   const t = useTranslations("lesson")
+  const locale = useLocale()
   const mastery = masteryFromScore(score)
   const meta = masteryMeta[mastery]
   const circ = 2 * Math.PI * 52
@@ -573,7 +576,7 @@ function Results({
 
       <div className="mt-8 flex w-full flex-col gap-3">
         <Link
-          href={`/app/${mapId}`}
+          href={`/${locale}/app/${mapId}`}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01]"
         >
           {t('backToMap')}
