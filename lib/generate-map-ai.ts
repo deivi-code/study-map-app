@@ -13,6 +13,29 @@ import type { StudyMap } from "./types"
 const MIN_CONTENT_LENGTH = 50
 const DEFAULT_MODEL = "gemini-3.1-flash-lite"
 
+export function extractZodRetryMessage(err: unknown): string | null {
+  function findZodError(e: unknown): unknown {
+    if (!e || typeof e !== "object") return null
+    const obj = e as Record<string, unknown>
+    if (Array.isArray(obj.issues)) return e
+    if ("cause" in obj) return findZodError(obj.cause)
+    return null
+  }
+
+  const zodError = findZodError(err)
+  if (!zodError) return null
+
+  const issues = (zodError as { issues: Array<{ path: (string | number)[]; message: string }> }).issues
+  if (!issues.length) return null
+
+  return issues
+    .map((issue) => {
+      const path = issue.path.length > 0 ? `"${issue.path.join(".")}": ` : ""
+      return `${path}${issue.message}`
+    })
+    .join(". ")
+}
+
 function getGeminiApiKey(): string | undefined {
   return process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? process.env.GEMINI_API_KEY
 }
@@ -50,6 +73,18 @@ export async function generateMapFromContent(
     }
     return { map: toStudyMap(llm, source), usedAi: true }
   } catch (err) {
+    const zodMsg = extractZodRetryMessage(err)
+    if (zodMsg) {
+      try {
+        const retried = await callLlm(content, zodMsg)
+        const retryError = validateStudyMapGraph(retried.nodes)
+        if (retryError) throw new Error(retryError)
+        return { map: toStudyMap(retried, source), usedAi: true }
+      } catch (retryErr) {
+        console.error("[generate-map-ai] retry with Zod feedback also failed:", retryErr)
+      }
+    }
+
     console.error("[generate-map-ai] fallback to templates:", err)
     return { map: generateStudyMap({ text: content, source }), usedAi: false }
   }
