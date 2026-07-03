@@ -32,6 +32,13 @@ async function extractPdfText(file: File): Promise<string> {
   return trimmed
 }
 
+export async function readPdfBuffer(file: File): Promise<Uint8Array> {
+  if (file.size > MAX_BYTES) {
+    throw new Error("El archivo supera el límite de 5 MB")
+  }
+  return new Uint8Array(await file.arrayBuffer())
+}
+
 export async function resolveContent(text: string, file: File | null): Promise<string> {
   const trimmed = text.trim()
   if (file) {

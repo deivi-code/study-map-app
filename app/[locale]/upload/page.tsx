@@ -3,8 +3,9 @@
 import { useRef, useState, useActionState } from "react"
 import { useLocale, useTranslations } from 'next-intl'
 import { useFormStatus } from "react-dom"
-import { ArrowLeft, FileText, Loader2, Sparkles, Upload, X } from "lucide-react"
+import { ArrowLeft, FileText, Loader2, LogIn, Sparkles, Upload, X } from "lucide-react"
 import { generateMapAction } from "@/lib/actions/generate-map"
+import { useAuth } from "@/lib/auth-context"
 import { Logo, ThemeToggle } from "@/components/brand"
 import Link from "next/link"
 
@@ -26,6 +27,7 @@ function SubmitButton({ canGenerate }: { canGenerate: boolean }) {
 export default function UploadPage() {
   const t = useTranslations('upload')
   const locale = useLocale()
+  const { user } = useAuth()
   const [text, setText] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -112,6 +114,21 @@ export default function UploadPage() {
             <input type="hidden" name="source" value={file?.name ?? "Apuntes pegados"} />
             <input type="hidden" name="locale" value={locale} />
           </div>
+
+          {user?.isAnonymous && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-mastery-amber/30 bg-mastery-amber/10 px-4 py-2.5 text-xs text-mastery-amber">
+              <LogIn className="size-3.5 shrink-0" />
+              <span>
+                {t.rich('loginForDiagrams', {
+                  link: (chunks) => (
+                    <Link href="/login" className="font-medium underline underline-offset-2">
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </span>
+            </div>
+          )}
 
           <div className="my-6 flex items-center gap-4">
             <span className="h-px flex-1 bg-border" />

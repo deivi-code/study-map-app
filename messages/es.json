@@ -51,7 +51,8 @@
     "generating": "Generando…",
     "generate": "Generar mapa",
     "aiNotice": "Analizamos tus apuntes con IA para crear un mapa personalizado.",
-    "removeFile": "Quitar archivo"
+    "removeFile": "Quitar archivo",
+    "loginForDiagrams": "<link>Inicia sesión</link> para analizar también diagramas y esquemas en tus PDFs."
   },
   "login": {
     "checkEmail": "Revisa tu correo",
