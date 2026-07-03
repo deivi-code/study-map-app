@@ -44,11 +44,13 @@ export async function generateMapAction(_prevState: unknown, formData: FormData)
       }
     }
 
+    const locale = (formData.get("locale") as string | null) ?? "es"
+
     let map: StudyMap
 
     if (usePdfMultimodal) {
       const pdfBuffer = await readPdfBuffer(file)
-      const result = await generateMapFromPdf(pdfBuffer, source)
+      const result = await generateMapFromPdf(pdfBuffer, source, locale)
       map = result.map
     } else {
       const content = await resolveContent(text, isFile ? file : null)
@@ -57,10 +59,9 @@ export async function generateMapAction(_prevState: unknown, formData: FormData)
         return { error: "Proporciona más texto o un PDF con contenido suficiente." }
       }
 
-      const result = await generateMapFromContent(content, source)
+      const result = await generateMapFromContent(content, source, locale)
       map = result.map
     }
-
     let savedMap = map
     if (userId) {
       const mapId = crypto.randomUUID()

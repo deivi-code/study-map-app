@@ -64,12 +64,14 @@ export async function POST(request: Request) {
       }
     }
 
+    const locale = (formData.get("locale") as string | null) ?? "es"
+
     let map: StudyMap
     let usedAi: boolean
 
     if (usePdfMultimodal) {
       const pdfBuffer = await readPdfBuffer(file)
-      const result = await generateMapFromPdf(pdfBuffer, source)
+      const result = await generateMapFromPdf(pdfBuffer, source, locale)
       map = result.map
       usedAi = result.usedAi
     } else {
@@ -82,11 +84,10 @@ export async function POST(request: Request) {
         )
       }
 
-      const result = await generateMapFromContent(content, source)
+      const result = await generateMapFromContent(content, source, locale)
       map = result.map
       usedAi = result.usedAi
     }
-
     // Save to database if we have a user ID
     let savedMap = map
     if (userId) {

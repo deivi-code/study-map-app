@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { generateText, Output } from "ai"
 import { extractText, getDocumentProxy } from "unpdf"
-import { buildUserPrompt, buildPdfUserPrompt, SYSTEM_PROMPT } from "./prompts"
+import { buildSystemPrompt, buildUserPrompt, buildPdfUserPrompt } from "./prompts"
 import {
   llmStudyMapSchema,
   toStudyMap,
@@ -53,6 +53,7 @@ function getGeminiModel() {
 export async function generateMapFromContent(
   content: string,
   source: string,
+  locale = "es",
 ): Promise<{ map: StudyMap; usedAi: boolean }> {
   if (content.trim().length < MIN_CONTENT_LENGTH) {
     throw new Error("El contenido es demasiado corto para generar un mapa (mínimo ~50 caracteres)")
@@ -63,11 +64,11 @@ export async function generateMapFromContent(
   }
 
   try {
-    const llm = await callLlm(content)
+    const llm = await callLlm(content, locale)
     console.log("[generate-map-ai] llm:", llm)
     const graphError = validateStudyMapGraph(llm.nodes)
     if (graphError) {
-      const retried = await callLlm(content, graphError)
+      const retried = await callLlm(content, locale, graphError)
       const retryError = validateStudyMapGraph(retried.nodes)
       if (retryError) throw new Error(retryError)
       return { map: toStudyMap(retried, source), usedAi: true }
@@ -77,7 +78,7 @@ export async function generateMapFromContent(
     const zodMsg = extractZodRetryMessage(err)
     if (zodMsg) {
       try {
-        const retried = await callLlm(content, zodMsg)
+        const retried = await callLlm(content, locale, zodMsg)
         const retryError = validateStudyMapGraph(retried.nodes)
         if (retryError) throw new Error(retryError)
         return { map: toStudyMap(retried, source), usedAi: true }
@@ -91,7 +92,7 @@ export async function generateMapFromContent(
   }
 }
 
-async function callLlm(content: string, retryError?: string): Promise<LlmStudyMap> {
+async function callLlm(content: string, locale: string, retryError?: string): Promise<LlmStudyMap> {
   const model = getGeminiModel()
   if (!model) throw new Error("Gemini API key no configurada")
 
@@ -100,8 +101,8 @@ async function callLlm(content: string, retryError?: string): Promise<LlmStudyMa
     output: Output.object({
       schema: llmStudyMapSchema,
     }),
-    system: SYSTEM_PROMPT,
-    prompt: buildUserPrompt(content, retryError),
+    system: buildSystemPrompt(locale),
+    prompt: buildUserPrompt(content, locale, retryError),
     temperature: 0.4,
   })
 
@@ -127,7 +128,7 @@ async function extractTextFromPdfBuffer(buffer: Uint8Array): Promise<string> {
   return trimmed
 }
 
-async function callLlmWithPdf(pdfBuffer: Uint8Array, retryError?: string): Promise<LlmStudyMap> {
+async function callLlmWithPdf(pdfBuffer: Uint8Array, locale: string, retryError?: string): Promise<LlmStudyMap> {
   const model = getPdfGeminiModel()
   if (!model) throw new Error("Gemini API key no configurada")
 
@@ -136,12 +137,12 @@ async function callLlmWithPdf(pdfBuffer: Uint8Array, retryError?: string): Promi
     output: Output.object({
       schema: llmStudyMapSchema,
     }),
-    system: SYSTEM_PROMPT,
+    system: buildSystemPrompt(locale),
     messages: [
       {
         role: "user",
         content: [
-          { type: "text", text: buildPdfUserPrompt(retryError) },
+          { type: "text", text: buildPdfUserPrompt(locale, retryError) },
           { type: "file", data: pdfBuffer, mediaType: "application/pdf" },
         ],
       },
@@ -155,6 +156,7 @@ async function callLlmWithPdf(pdfBuffer: Uint8Array, retryError?: string): Promi
 export async function generateMapFromPdf(
   pdfBuffer: Uint8Array,
   source: string,
+  locale = "es",
 ): Promise<{ map: StudyMap; usedAi: boolean }> {
   if (!getGeminiApiKey()) {
     const content = await extractTextFromPdfBuffer(pdfBuffer)
@@ -162,11 +164,11 @@ export async function generateMapFromPdf(
   }
 
   try {
-    const llm = await callLlmWithPdf(pdfBuffer)
+    const llm = await callLlmWithPdf(pdfBuffer, locale)
     console.log("[generate-map-ai] pdf llm:", llm)
     const graphError = validateStudyMapGraph(llm.nodes)
     if (graphError) {
-      const retried = await callLlmWithPdf(pdfBuffer, graphError)
+      const retried = await callLlmWithPdf(pdfBuffer, locale, graphError)
       const retryError = validateStudyMapGraph(retried.nodes)
       if (retryError) throw new Error(retryError)
       return { map: toStudyMap(retried, source), usedAi: true }
@@ -176,7 +178,7 @@ export async function generateMapFromPdf(
     const zodMsg = extractZodRetryMessage(err)
     if (zodMsg) {
       try {
-        const retried = await callLlmWithPdf(pdfBuffer, zodMsg)
+        const retried = await callLlmWithPdf(pdfBuffer, locale, zodMsg)
         const retryError = validateStudyMapGraph(retried.nodes)
         if (retryError) throw new Error(retryError)
         return { map: toStudyMap(retried, source), usedAi: true }

@@ -1,7 +1,13 @@
-export const SYSTEM_PROMPT = `Eres un experto en pedagogía que convierte apuntes en mapas de conocimiento interactivos.
+export function buildSystemPrompt(locale: string): string {
+  const lang = locale === "en"
+    ? "Respond ONLY in English. All content, questions, options, hints, accepted answers, and explanations MUST be in English."
+    : "Responde SIEMPRE en español. Todo el contenido, preguntas, opciones, pistas, respuestas aceptadas y explicaciones DEBEN estar en español."
+
+  return `${lang}
+
+Eres un experto en pedagogía que convierte apuntes en mapas de conocimiento interactivos.
 
 REGLAS ESTRICTAS:
-- Responde SIEMPRE en español.
 - Usa ÚNICAMENTE información presente en los apuntes proporcionados. No inventes conceptos ajenos al texto.
 - Genera entre 6 y 10 nodos de conocimiento organizados en un árbol con prerrequisitos (deps).
 - Cada nodo debe tener un id en kebab-case único (ej: "membrana-plasmatica").
@@ -41,24 +47,45 @@ REGLAS ADICIONALES:
 IMPORTANTE:
 - examples debe contener EXACTAMENTE 1 o 2 elementos.
 - No uses símbolos aislados como ejemplo.`
+}
 
-export function buildUserPrompt(content: string, retryError?: string): string {
+export function buildUserPrompt(content: string, locale: string, retryError?: string): string {
   const truncated =
     content.length > 30_000 ? `${content.slice(0, 30_000)}\n\n[... texto truncado ...]` : content
 
-  let prompt = `Analiza estos apuntes y genera un mapa de estudio completo con lecciones mixtas:\n\n---\n${truncated}\n---`
+  const langInstruction = locale === "en"
+    ? "Analyze these notes and generate a complete study map with mixed lessons:"
+    : "Analiza estos apuntes y genera un mapa de estudio completo con lecciones mixtas:"
+
+  let prompt = `${langInstruction}\n\n---\n${truncated}\n---`
 
   if (retryError) {
-    prompt += `\n\nCORRECCIÓN REQUERIDA: La generación anterior falló la validación: ${retryError}. Corrige el JSON.`
+    const correction = locale === "en"
+      ? `CORRECTION REQUIRED: The previous generation failed validation: ${retryError}. Fix the JSON.`
+      : `CORRECCIÓN REQUERIDA: La generación anterior falló la validación: ${retryError}. Corrige el JSON.`
+    prompt += `\n\n${correction}`
   }
 
   return prompt
 }
 
-export function buildPdfUserPrompt(retryError?: string): string {
-  let prompt = `Analiza este PDF y genera un mapa de estudio completo con lecciones mixtas.
+export function buildPdfUserPrompt(locale: string, retryError?: string): string {
+  const intro = locale === "en"
+    ? "Analyze this PDF and generate a complete study map with mixed lessons."
+    : "Analiza este PDF y genera un mapa de estudio completo con lecciones mixtas."
 
-El usuario ha subido un archivo PDF. Este PDF puede contener texto, diagramas, esquemas, gráficos, tablas y otros elementos visuales.
+  const body = locale === "en"
+    ? `The user uploaded a PDF file. This PDF may contain text, diagrams, schemas, charts, tables and other visual elements.
+
+INSTRUCTIONS:
+- Extract all relevant information from the PDF, both from text and visual elements (diagrams, schemas, charts, tables, concept maps, timelines, etc.).
+- If there are diagrams or schemas, interpret their structure and relationships to build the knowledge tree.
+- If there are charts or tables, extract the main data and conclusions.
+- Organize the concepts into a tree with prerequisites (deps).
+- Generate between 6 and 10 knowledge nodes.
+- Each node must have levels that reflect the depth in the tree.
+- Identify the main topic of the PDF to use as subject.`
+    : `El usuario ha subido un archivo PDF. Este PDF puede contener texto, diagramas, esquemas, gráficos, tablas y otros elementos visuales.
 
 INSTRUCCIONES:
 - Extrae toda la información relevante del PDF, tanto del texto como de los elementos visuales (diagramas, esquemas, gráficos, tablas, mapas conceptuales, líneas de tiempo, etc.).
@@ -67,14 +94,19 @@ INSTRUCCIONES:
 - Organiza los conceptos en un árbol con prerrequisitos (deps).
 - Genera entre 6 y 10 nodos de conocimiento.
 - Cada nodo debe tener niveles (level) que reflejen la profundidad en el árbol.
-- Identifica el tema principal del PDF para usarlo como subject.
+- Identifica el tema principal del PDF para usarlo como subject.`
 
-IMPORTANTE:
-- No inventes información que no esté presente en el PDF.
-- Si un diagrama muestra una relación entre conceptos, refleja esa relación en los deps.`
+  const important = locale === "en"
+    ? "IMPORTANT:\n- Do not invent information not present in the PDF.\n- If a diagram shows a relationship between concepts, reflect that relationship in the deps."
+    : "IMPORTANTE:\n- No inventes información que no esté presente en el PDF.\n- Si un diagrama muestra una relación entre conceptos, refleja esa relación en los deps."
+
+  let prompt = `${intro}\n\n${body}\n\n${important}`
 
   if (retryError) {
-    prompt += `\n\nCORRECCIÓN REQUERIDA: La generación anterior falló la validación: ${retryError}. Corrige el JSON.`
+    const correction = locale === "en"
+      ? `CORRECTION REQUIRED: The previous generation failed validation: ${retryError}. Fix the JSON.`
+      : `CORRECCIÓN REQUERIDA: La generación anterior falló la validación: ${retryError}. Corrige el JSON.`
+    prompt += `\n\n${correction}`
   }
 
   return prompt

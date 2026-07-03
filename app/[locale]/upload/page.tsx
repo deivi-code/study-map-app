@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState, useActionState } from "react"
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useFormStatus } from "react-dom"
 import { ArrowLeft, FileText, Loader2, LogIn, Sparkles, Upload, X } from "lucide-react"
 import { generateMapAction } from "@/lib/actions/generate-map"
@@ -26,6 +26,7 @@ function SubmitButton({ canGenerate }: { canGenerate: boolean }) {
 
 export default function UploadPage() {
   const t = useTranslations('upload')
+  const locale = useLocale()
   const { user } = useAuth()
   const [text, setText] = useState("")
   const [file, setFile] = useState<File | null>(null)
@@ -111,6 +112,7 @@ export default function UploadPage() {
               </>
             )}
             <input type="hidden" name="source" value={file?.name ?? "Apuntes pegados"} />
+            <input type="hidden" name="locale" value={locale} />
           </div>
 
           {user?.isAnonymous && (
