@@ -28,6 +28,7 @@ export async function generateMapAction(_prevState: unknown, formData: FormData)
 
     const text = (formData.get("text") as string | null) ?? ""
     const source = (formData.get("source") as string | null) ?? "Apuntes"
+    const locale = (formData.get("locale") as string | null) ?? "es"
     const file = formData.get("file") as File | null
 
     const content = await resolveContent(text, file && file.size > 0 ? file : null)
@@ -36,7 +37,7 @@ export async function generateMapAction(_prevState: unknown, formData: FormData)
       return { error: "Proporciona más texto o un PDF con contenido suficiente." }
     }
 
-    const { map } = await generateMapFromContent(content, source)
+    const { map } = await generateMapFromContent(content, source, locale)
 
     let savedMap = map
     if (userId) {

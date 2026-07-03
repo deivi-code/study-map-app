@@ -1,6 +1,6 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { generateText, Output } from "ai"
-import { buildUserPrompt, SYSTEM_PROMPT } from "./prompts"
+import { buildSystemPrompt, buildUserPrompt } from "./prompts"
 import {
   llmStudyMapSchema,
   toStudyMap,
@@ -52,6 +52,7 @@ function getGeminiModel() {
 export async function generateMapFromContent(
   content: string,
   source: string,
+  locale = "es",
 ): Promise<{ map: StudyMap; usedAi: boolean }> {
   if (content.trim().length < MIN_CONTENT_LENGTH) {
     throw new Error("El contenido es demasiado corto para generar un mapa (mínimo ~50 caracteres)")
@@ -62,11 +63,11 @@ export async function generateMapFromContent(
   }
 
   try {
-    const llm = await callLlm(content)
+    const llm = await callLlm(content, locale)
     console.log("[generate-map-ai] llm:", llm)
     const graphError = validateStudyMapGraph(llm.nodes)
     if (graphError) {
-      const retried = await callLlm(content, graphError)
+      const retried = await callLlm(content, locale, graphError)
       const retryError = validateStudyMapGraph(retried.nodes)
       if (retryError) throw new Error(retryError)
       return { map: toStudyMap(retried, source), usedAi: true }
@@ -76,7 +77,7 @@ export async function generateMapFromContent(
     const zodMsg = extractZodRetryMessage(err)
     if (zodMsg) {
       try {
-        const retried = await callLlm(content, zodMsg)
+        const retried = await callLlm(content, locale, zodMsg)
         const retryError = validateStudyMapGraph(retried.nodes)
         if (retryError) throw new Error(retryError)
         return { map: toStudyMap(retried, source), usedAi: true }
@@ -90,7 +91,7 @@ export async function generateMapFromContent(
   }
 }
 
-async function callLlm(content: string, retryError?: string): Promise<LlmStudyMap> {
+async function callLlm(content: string, locale: string, retryError?: string): Promise<LlmStudyMap> {
   const model = getGeminiModel()
   if (!model) throw new Error("Gemini API key no configurada")
 
@@ -99,8 +100,8 @@ async function callLlm(content: string, retryError?: string): Promise<LlmStudyMa
     output: Output.object({
       schema: llmStudyMapSchema,
     }),
-    system: SYSTEM_PROMPT,
-    prompt: buildUserPrompt(content, retryError),
+    system: buildSystemPrompt(locale),
+    prompt: buildUserPrompt(content, locale, retryError),
     temperature: 0.4,
   })
 

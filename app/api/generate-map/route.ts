@@ -48,6 +48,7 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const text = (formData.get("text") as string | null) ?? ""
     const source = (formData.get("source") as string | null) ?? "Apuntes"
+    const locale = (formData.get("locale") as string | null) ?? "es"
     const file = formData.get("file") as File | null
 
     const content = await resolveContent(text, file && file.size > 0 ? file : null)
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { map, usedAi } = await generateMapFromContent(content, source)
+    const { map, usedAi } = await generateMapFromContent(content, source, locale)
 
     // Save to database if we have a user ID
     let savedMap = map
