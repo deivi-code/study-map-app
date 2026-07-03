@@ -1,6 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { generateText, Output } from "ai"
-import { buildUserPrompt, SYSTEM_PROMPT } from "./prompts"
+import { extractText, getDocumentProxy } from "unpdf"
+import { buildUserPrompt, buildPdfUserPrompt, SYSTEM_PROMPT } from "./prompts"
 import {
   llmStudyMapSchema,
   toStudyMap,
@@ -9,9 +10,9 @@ import {
 } from "./schemas"
 import { generateStudyMap } from "./study"
 import type { StudyMap } from "./types"
-
 const MIN_CONTENT_LENGTH = 50
 const DEFAULT_MODEL = "gemini-3.1-flash-lite"
+const PDF_MODEL = "gemini-2.5-flash"
 
 export function extractZodRetryMessage(err: unknown): string | null {
   function findZodError(e: unknown): unknown {
@@ -105,4 +106,87 @@ async function callLlm(content: string, retryError?: string): Promise<LlmStudyMa
   })
 
   return output as LlmStudyMap
+}
+
+function getPdfGeminiModel() {
+  const apiKey = getGeminiApiKey()
+  if (!apiKey) return null
+
+  const google = createGoogleGenerativeAI({ apiKey })
+  const modelId = process.env.GEMINI_PDF_MODEL ?? PDF_MODEL
+  return google(modelId)
+}
+
+async function extractTextFromPdfBuffer(buffer: Uint8Array): Promise<string> {
+  const pdf = await getDocumentProxy(buffer)
+  const { text } = await extractText(pdf, { mergePages: true })
+  const trimmed = text.trim()
+  if (trimmed.length < 20) {
+    throw new Error("No se pudo extraer texto del PDF. ¿Es un PDF escaneado?")
+  }
+  return trimmed
+}
+
+async function callLlmWithPdf(pdfBuffer: Uint8Array, retryError?: string): Promise<LlmStudyMap> {
+  const model = getPdfGeminiModel()
+  if (!model) throw new Error("Gemini API key no configurada")
+
+  const { output } = await generateText({
+    model,
+    output: Output.object({
+      schema: llmStudyMapSchema,
+    }),
+    system: SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: buildPdfUserPrompt(retryError) },
+          { type: "file", data: pdfBuffer, mediaType: "application/pdf" },
+        ],
+      },
+    ],
+    temperature: 0.4,
+  })
+
+  return output as LlmStudyMap
+}
+
+export async function generateMapFromPdf(
+  pdfBuffer: Uint8Array,
+  source: string,
+): Promise<{ map: StudyMap; usedAi: boolean }> {
+  if (!getGeminiApiKey()) {
+    const content = await extractTextFromPdfBuffer(pdfBuffer)
+    return { map: generateStudyMap({ text: content, source }), usedAi: false }
+  }
+
+  try {
+    const llm = await callLlmWithPdf(pdfBuffer)
+    console.log("[generate-map-ai] pdf llm:", llm)
+    const graphError = validateStudyMapGraph(llm.nodes)
+    if (graphError) {
+      const retried = await callLlmWithPdf(pdfBuffer, graphError)
+      const retryError = validateStudyMapGraph(retried.nodes)
+      if (retryError) throw new Error(retryError)
+      return { map: toStudyMap(retried, source), usedAi: true }
+    }
+    return { map: toStudyMap(llm, source), usedAi: true }
+  } catch (err) {
+    const zodMsg = extractZodRetryMessage(err)
+    if (zodMsg) {
+      try {
+        const retried = await callLlmWithPdf(pdfBuffer, zodMsg)
+        const retryError = validateStudyMapGraph(retried.nodes)
+        if (retryError) throw new Error(retryError)
+        return { map: toStudyMap(retried, source), usedAi: true }
+      } catch (retryErr) {
+        console.error("[generate-map-ai] pdf retry with Zod feedback also failed:", retryErr)
+      }
+    }
+
+    console.error("[generate-map-ai] pdf fallback to text templates:", err)
+    const content = await extractTextFromPdfBuffer(pdfBuffer)
+    return { map: generateStudyMap({ text: content, source }), usedAi: false }
+  }
 }

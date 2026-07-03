@@ -51,7 +51,8 @@
     "generating": "Generating…",
     "generate": "Generate map",
     "aiNotice": "We analyze your notes with AI to create a personalized map.",
-    "removeFile": "Remove file"
+    "removeFile": "Remove file",
+    "loginForDiagrams": "<link>Sign in</link> to also analyze diagrams and schemas in your PDFs."
   },
   "login": {
     "checkEmail": "Check your email",

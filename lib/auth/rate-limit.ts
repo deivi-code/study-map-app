@@ -56,3 +56,7 @@ export async function getAnonymousLimit(): Promise<number> {
 export async function getAuthenticatedLimit(): Promise<number> {
   return 10 // 10 maps per 3 hours
 }
+
+export async function getAuthenticatedPdfLimit(): Promise<number> {
+  return 3 // 3 multimodal PDF generations per 3 hours
+}

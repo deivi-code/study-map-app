@@ -1,28 +1,47 @@
 import { NextResponse } from "next/server"
-import { resolveContent } from "@/lib/extract-text"
-import { generateMapFromContent } from "@/lib/generate-map-ai"
+import { readPdfBuffer, resolveContent } from "@/lib/extract-text"
+import { generateMapFromContent, generateMapFromPdf } from "@/lib/generate-map-ai"
+import type { StudyMap } from "@/lib/types"
 import { db } from "@/lib/db"
 import { studyMap } from "@/lib/db/schema"
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
-import { checkRateLimit, getAnonymousLimit, getAuthenticatedLimit } from "@/lib/auth/rate-limit"
+import { checkRateLimit, getAnonymousLimit, getAuthenticatedLimit, getAuthenticatedPdfLimit } from "@/lib/auth/rate-limit"
+import { enhanceErrorMessage, isKnownUserError, notifyUnexpectedError } from "@/lib/notify-error"
 
 export const runtime = "nodejs"
 export const maxDuration = 120
 
 export async function POST(request: Request) {
+  let userId: string | null = null
+  let isAnonymousUser = true
+  let source = "Apuntes"
+
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     })
 
-    const userId = session?.user?.id || null
+    userId = session?.user?.id || null
+    isAnonymousUser = session?.user?.isAnonymous ?? true
+
+    const formData = await request.formData()
+    const text = (formData.get("text") as string | null) ?? ""
+    source = (formData.get("source") as string | null) ?? "Apuntes"
+    const file = formData.get("file") as File | null
+    const isFile = file && file.size > 0
+    const isPdf = isFile && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))
+    const isAuthenticated = !!userId && !isAnonymousUser
+    const usePdfMultimodal = isPdf && isAuthenticated
 
     // Check rate limit
     let rateLimitInfo: { remaining: number; resetAt: Date } | null = null
-    if (userId && session) {
-      const limit = session.user.isAnonymous ? await getAnonymousLimit() : await getAuthenticatedLimit()
-      const rateLimitResult = await checkRateLimit(userId, "create_map", limit)
+    if (userId) {
+      const [limit, actionKey] = usePdfMultimodal
+        ? [await getAuthenticatedPdfLimit(), "create_map_pdf"]
+        : [isAnonymousUser ? await getAnonymousLimit() : await getAuthenticatedLimit(), "create_map"]
+
+      const rateLimitResult = await checkRateLimit(userId, actionKey, limit)
 
       if (!rateLimitResult.allowed) {
         const resetStr = rateLimitResult.resetAt.toLocaleString("es-ES", {
@@ -45,21 +64,28 @@ export async function POST(request: Request) {
       }
     }
 
-    const formData = await request.formData()
-    const text = (formData.get("text") as string | null) ?? ""
-    const source = (formData.get("source") as string | null) ?? "Apuntes"
-    const file = formData.get("file") as File | null
+    let map: StudyMap
+    let usedAi: boolean
 
-    const content = await resolveContent(text, file && file.size > 0 ? file : null)
+    if (usePdfMultimodal) {
+      const pdfBuffer = await readPdfBuffer(file)
+      const result = await generateMapFromPdf(pdfBuffer, source)
+      map = result.map
+      usedAi = result.usedAi
+    } else {
+      const content = await resolveContent(text, isFile ? file : null)
 
-    if (content.trim().length < 50) {
-      return NextResponse.json(
-        { error: "Proporciona más texto o un PDF con contenido suficiente." },
-        { status: 400 },
-      )
+      if (content.trim().length < 50) {
+        return NextResponse.json(
+          { error: "Proporciona más texto o un PDF con contenido suficiente." },
+          { status: 400 },
+        )
+      }
+
+      const result = await generateMapFromContent(content, source)
+      map = result.map
+      usedAi = result.usedAi
     }
-
-    const { map, usedAi } = await generateMapFromContent(content, source)
 
     // Save to database if we have a user ID
     let savedMap = map
@@ -82,8 +108,25 @@ export async function POST(request: Request) {
       resetAt: rateLimitInfo?.resetAt ?? null,
     })
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Error al generar el mapa"
     console.error("[api/generate-map]", err)
-    return NextResponse.json({ error: message }, { status: 500 })
+
+    if (isKnownUserError(err)) {
+      return NextResponse.json(
+        { error: enhanceErrorMessage(err, !userId || isAnonymousUser) },
+        { status: 400 },
+      )
+    }
+
+    await notifyUnexpectedError(err, {
+      userId,
+      source,
+      isAuthenticated: !!userId && !isAnonymousUser,
+      route: "api-generate-map",
+    })
+
+    return NextResponse.json(
+      { error: "La IA a veces se equivoca. Vuelve a intentarlo o pega el texto de forma manual." },
+      { status: 500 },
+    )
   }
 }
